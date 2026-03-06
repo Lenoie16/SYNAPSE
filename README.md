@@ -1,24 +1,40 @@
 <div align="center">
 
+# SYNAPSE
+
+Real-time collaboration workspace for teams and developers.
+
 </div>
 
-##This contains everything you need to run your app.
+---
 
-[the port can also be forwarded through tunneling and it will still work]
+## Overview
 
-[make sure there is nothing on port 3000 or u can change it in viteconfig.js and server.ts files to use different ports]
+This repository contains everything required to run the **Synapse collaboration platform** locally.
 
-[make sure you and your team members are on the same Network]
+The application allows multiple users on the same network to collaborate in real time using shared rooms.
 
-Good Luck
+> ⚠️ Make sure port **3000** is available before starting the application.
 
+If needed, you can change the port inside:
 
-## Run Application
-**Prerequisites:**  Node.js
+- `vite.config.js`
+- `server.ts`
 
-double click on [Start.bat](start.bat) to start the applicaiton
+The application can also work through **port forwarding or tunneling** if remote access is required.
 
-## Documentation
-- [Features](FEATURES.md)
-- [User Manual](User_Manual.md)
-   
+---
+
+## Requirements
+
+Before running the application, install:
+
+- **Node.js** (https://nodejs.org)
+
+---
+
+## Run the Application
+
+1. Download or clone this repository.
+2. Ensure **Node.js is installed**.
+3. Double-click:
