@@ -73,5 +73,4 @@ For real-time collaboration:
 ---
 
 **Good luck and happy collaborating 🚀**
-3. Ensure **Node.js is installed**.
-4. Double-click:
+
