@@ -13,5 +13,5 @@ This contains everything you need to run your app locally.
 
 ## Documentation
 - [Features](FEATURES.md)
-- [User Manual](USER_MANUAL.md)
+- [User Manual](User_Manual.md)
    
