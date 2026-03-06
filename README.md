@@ -47,7 +47,7 @@ If needed, you can change the port inside:
 
 The application can also work through **port forwarding or tunneling** if remote access is required.
 👉 Full feature list:
-[Features Documentation](FEATURES.md)
+[Features Documentation](Features.md)
 
 ---
 
@@ -130,7 +130,7 @@ For real-time collaboration:
 - Or the host must expose the server using **port forwarding or tunneling**
 | Document                      | Description                      |
 | ----------------------------- | -------------------------------- |
-| [Features](FEATURES.md)       | Full technical feature breakdown |
+| [Features](Features.md)       | Full technical feature breakdown |
 | [User Manual](User_Manual.md) | Guide for using the platform     |
 
 ---
@@ -154,7 +154,7 @@ Backend
 
 Collaboration Engine
 
-- 📌 [Features](FEATURES.md)
+- 📌 [Features](Features.md)
 - 📘 [User Manual](User_Manual.md)
 * Yjs CRDT
 
