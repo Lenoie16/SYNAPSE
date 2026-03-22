@@ -161,3 +161,5 @@ known issues - code editor error in low network
                mobile UI is flikering
 will be solved shortly
 
+
+Admin Console - Username and password - admin1
