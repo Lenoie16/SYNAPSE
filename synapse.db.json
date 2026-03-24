@@ -1,0 +1,7 @@
+{
+  "rooms": [],
+  "admin": {
+    "username": "admin1",
+    "passwordHash": "$2b$10$dq4MWSBy/ExOhn2Ni528KuiiwPnOwJn8Q2onTK6EnT8rafWtArsnu"
+  }
+}

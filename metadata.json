@@ -1,0 +1,5 @@
+{
+  "name": "SYNAPSE ( no tauri )",
+  "description": "A comprehensive hackathon management dashboard featuring a real-time Kanban board, snippet vault, project boilerplate generator, and AI-powered pressure analysis.",
+  "requestFramePermissions": []
+}
