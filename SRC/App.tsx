@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { View, Task, Snippet, SharedFile, User, DirectoryState, Section, EditorNode, EditorFile, EditorFolder } from '@/types';
 import { Kanban } from '@/components/Kanban';
-
+import { BoilerplateGenerator } from '@/components/BoilerplateGenerator';
 import { SnippetVault } from '@/components/SnippetVault';
 
 import { DirectoryBrowser } from '@/components/DirectoryBrowser';
@@ -195,7 +195,7 @@ const App: React.FC = () => {
     socket.on('auth:passwordUpdated', (newPass) => {
         setAccessKey(newPass);
         setPasswordUpdateStatus('success');
-        setTimeout(() => setPasswordUpdateStatus('idle'), 4000);
+        setTimeout(() => setPasswordUpdateStatus('idle'), 3000);
         const session = localStorage.getItem('synapse_session');
         if(session) {
             const data = JSON.parse(session);
@@ -540,8 +540,18 @@ const App: React.FC = () => {
                                         encryptionEnabled={encryptionEnabled}
                                     />
                             )}
-                            
-                            
+                            {view === 'boilerplate' && (
+                                <motion.div
+                                    key="boilerplate"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="h-full w-full"
+                                >
+                                    <BoilerplateGenerator />
+                                </motion.div>
+                            )}
                             {view === 'directory' && (
                                 <motion.div
                                     key="directory"
