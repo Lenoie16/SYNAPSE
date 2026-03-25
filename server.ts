@@ -777,7 +777,7 @@ async function startServer() {
 
   // --- PUBLIC FILE API ---
   app.post('/upload', upload.single('file'), (req: CustomRequest, res: Response) => {
-      if (!req.file || !req.body.roomName || !req.body.password) {
+      if (!req.file || !req.body.roomName || req.body.password === undefined) {
           return res.status(400).send('Missing file, roomName, or password');
       }
       const roomName: string = req.body.roomName;
@@ -804,7 +804,7 @@ async function startServer() {
       const { roomName, filename } = req.params;
       const password = req.headers['authorization'];
       
-      if (!password) {
+      if (password === undefined) {
           return res.status(401).send('Missing password');
       }
       
@@ -836,7 +836,7 @@ async function startServer() {
       const { roomName, filename } = req.params;
       const password = req.query.password as string;
       
-      if (!password) {
+      if (password === undefined) {
           return res.status(401).send('Missing password');
       }
       
