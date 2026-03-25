@@ -68,10 +68,11 @@ function wordArrayToArrayBuffer(wordArray: CryptoJS.lib.WordArray) {
 }
 
 export async function encryptFile(fileBuffer: ArrayBuffer, password: string): Promise<ArrayBuffer> {
+    const key = CryptoJS.SHA256(password);
     const iv = CryptoJS.lib.WordArray.random(16);
     const dataWordArray = arrayBufferToWordArray(fileBuffer);
     
-    const encrypted = CryptoJS.AES.encrypt(dataWordArray as any, password, {
+    const encrypted = CryptoJS.AES.encrypt(dataWordArray as any, key, {
         iv: iv,
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7
@@ -90,6 +91,7 @@ export async function encryptFile(fileBuffer: ArrayBuffer, password: string): Pr
 
 export async function decryptFile(encryptedBuffer: ArrayBuffer, password: string): Promise<ArrayBuffer> {
     try {
+        const key = CryptoJS.SHA256(password);
         const ivBuffer = encryptedBuffer.slice(0, 16);
         const cipherBuffer = encryptedBuffer.slice(16);
         
@@ -100,7 +102,7 @@ export async function decryptFile(encryptedBuffer: ArrayBuffer, password: string
             ciphertext: ciphertext
         });
         
-        const decrypted = CryptoJS.AES.decrypt(cipherParams, password, {
+        const decrypted = CryptoJS.AES.decrypt(cipherParams, key, {
             iv: iv,
             mode: CryptoJS.mode.CBC,
             padding: CryptoJS.pad.Pkcs7
