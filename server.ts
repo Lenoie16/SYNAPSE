@@ -789,8 +789,26 @@ async function startServer() {
       }
 
       const tempPath = req.file.path;
-      const targetName = `${roomName}---${req.file.originalname}`;
+      const originalName = req.file.originalname;
+      const targetName = `${roomName}---${originalName}`;
       const targetPath = path.join(uploadDir, targetName);
+
+      if (fs.existsSync(targetPath)) {
+          let counter = 1;
+          const ext = path.extname(originalName);
+          const base = path.basename(originalName, ext);
+          let backupPath = '';
+          
+          while (true) {
+              const versionedName = `${base}_v${counter}${ext}`;
+              backupPath = path.join(uploadDir, `${roomName}---${versionedName}`);
+              if (!fs.existsSync(backupPath)) break;
+              counter++;
+          }
+          
+          // Rename the existing file to the backup name
+          fs.renameSync(targetPath, backupPath);
+      }
 
       fs.rename(tempPath, targetPath, (err) => {
           if (err) return res.status(500).send("Server error processing file");
@@ -798,6 +816,66 @@ async function startServer() {
           io.to(roomName).emit('files:sync', roomFiles);
           res.status(200).send({ message: 'File uploaded successfully' });
       });
+  });
+
+  app.post('/upload/:roomName/:filename/revert', (req, res) => {
+      const { roomName, filename } = req.params;
+      const { targetFilename } = req.body;
+      const password = req.headers['authorization'];
+      
+      if (password === undefined) {
+          return res.status(401).send('Missing password');
+      }
+      
+      const room = rooms.get(roomName);
+      if (!room || room.password !== password) {
+          return res.status(401).send('Unauthorized');
+      }
+
+      const sourceRealFilename = `${roomName}---${filename}`;
+      const sourceFilePath = path.join(uploadDir, sourceRealFilename);
+      
+      const targetRealFilename = `${roomName}---${targetFilename}`;
+      const targetFilePath = path.join(uploadDir, targetRealFilename);
+      
+      if (path.basename(sourceRealFilename) !== sourceRealFilename || path.basename(targetRealFilename) !== targetRealFilename) {
+          return res.status(400).send("Invalid filename");
+      }
+
+      if (!fs.existsSync(sourceFilePath)) {
+          return res.status(404).send('Source file not found');
+      }
+
+      try {
+          // To revert, we copy the source file to the target file
+          // First, let's create a backup of the current target file if it exists
+          if (fs.existsSync(targetFilePath)) {
+              let counter = 1;
+              const ext = path.extname(targetFilename);
+              const base = path.basename(targetFilename, ext);
+              let backupPath = '';
+              while (true) {
+                  const versionedName = `${base}_v${counter}${ext}`;
+                  backupPath = path.join(uploadDir, `${roomName}---${versionedName}`);
+                  if (!fs.existsSync(backupPath)) break;
+                  counter++;
+              }
+              fs.renameSync(targetFilePath, backupPath);
+          }
+          
+          fs.copyFileSync(sourceFilePath, targetFilePath);
+          
+          // Update the modified time so it appears as the newest version
+          const now = new Date();
+          fs.utimesSync(targetFilePath, now, now);
+          
+          const roomFiles = getRoomFiles(roomName);
+          io.to(roomName).emit('files:sync', roomFiles);
+          res.status(200).send({ message: 'Reverted successfully' });
+      } catch (err) {
+          console.error("Error reverting file:", err);
+          res.status(500).send('Error reverting file');
+      }
   });
 
   app.delete('/upload/:roomName/:filename', (req, res) => {
