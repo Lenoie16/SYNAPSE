@@ -12,99 +12,131 @@ import { encryptFile, decryptFile } from '@/utils/crypto';
 type SortOption = 'newest' | 'oldest' | 'name' | 'size';
 type FileTypeFilter = 'All' | 'TypeScript' | 'JavaScript' | 'Python' | 'JSON' | 'PDF';
 
-const UploadControl: React.FC<{ serverUrl: string, roomName: string, roomPassword?: string, encryptionEnabled?: boolean }> = ({ serverUrl, roomName, roomPassword, encryptionEnabled }) => {
-    const [isUploading, setIsUploading] = useState(false);
-    const [encryptionStatus, setEncryptionStatus] = useState<'idle' | 'encrypting'>('idle');
-    const [uploadProgress, setUploadProgress] = useState<{ loaded: number; total: number } | null>(null);
+export interface UploadControlRef {
+    uploadFiles: (files: File[]) => void;
+}
+
+interface UploadTask {
+    id: string;
+    file: File;
+    status: 'pending' | 'encrypting' | 'uploading' | 'done' | 'error';
+    progress: number;
+    loaded: number;
+    total: number;
+    error?: string;
+}
+
+const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, roomName: string, roomPassword?: string, encryptionEnabled?: boolean }>(({ serverUrl, roomName, roomPassword, encryptionEnabled }, ref) => {
+    const [tasks, setTasks] = useState<UploadTask[]>([]);
+    const [showPopup, setShowPopup] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const lastProgressUpdate = useRef<number>(0);
 
     const cleanServerUrl = serverUrl.replace(/\/$/, '');
     const bytesToMB = (bytes: number) => (bytes / (1024 * 1024)).toFixed(2);
 
-    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    React.useImperativeHandle(ref, () => ({
+        uploadFiles: (files: File[]) => {
+            handleFiles(files);
+        }
+    }));
+
+    const handleFiles = (files: File[]) => {
+        const newTasks = files.map(file => ({
+            id: Math.random().toString(36).substring(7),
+            file,
+            status: 'pending' as const,
+            progress: 0,
+            loaded: 0,
+            total: file.size
+        }));
         
+        setTasks(prev => [...prev, ...newTasks]);
+        setShowPopup(true);
+        
+        // Start processing them
+        newTasks.forEach(task => processTask(task));
+    };
+
+    const processTask = async (task: UploadTask) => {
         if (roomPassword && encryptionEnabled) {
+            setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'encrypting' } : t));
             try {
-                setEncryptionStatus('encrypting');
                 // Small delay to allow UI to update
                 await new Promise(resolve => setTimeout(resolve, 100));
                 
-                const buffer = await file.arrayBuffer();
+                const buffer = await task.file.arrayBuffer();
                 const encryptedBuffer = await encryptFile(buffer, roomPassword);
-                const encryptedFile = new File([encryptedBuffer], file.name, { type: file.type });
+                const encryptedFile = new File([encryptedBuffer], task.file.name, { type: task.file.type });
                 
-                setEncryptionStatus('idle');
-                startUpload(encryptedFile);
+                startUpload(task.id, encryptedFile);
             } catch (error) {
                 console.error("Encryption failed:", error);
-                alert("Failed to encrypt file before upload.");
-                setEncryptionStatus('idle');
+                setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'error', error: 'Encryption failed' } : t));
             }
         } else {
-            startUpload(file);
+            startUpload(task.id, task.file);
         }
     };
 
-    const startUpload = (file: File) => {
-        setIsUploading(true);
-        setUploadProgress({ loaded: 0, total: file.size });
-        lastProgressUpdate.current = Date.now();
+    const startUpload = (taskId: string, file: File) => {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'uploading' } : t));
         
         const formData = new FormData();
         formData.append('roomName', roomName); 
         formData.append('file', file);
+        formData.append('password', roomPassword || '');
 
         const xhr = new XMLHttpRequest();
         
         xhr.upload.addEventListener("progress", (event) => {
           if (event.lengthComputable) {
-            const now = Date.now();
-            if (now - lastProgressUpdate.current >= 200 || event.loaded === event.total) {
-                setUploadProgress({
-                    loaded: event.loaded,
-                    total: event.total
-                });
-                lastProgressUpdate.current = now;
-            }
+              setTasks(prev => prev.map(t => t.id === taskId ? { 
+                  ...t, 
+                  loaded: event.loaded, 
+                  total: event.total,
+                  progress: (event.loaded / event.total) * 100
+              } : t));
           }
         });
 
         xhr.addEventListener("load", () => {
-          setTimeout(() => {
-              setIsUploading(false);
-              setUploadProgress(null);
-          }, 500);
-          
           if (xhr.status >= 200 && xhr.status < 300) {
-             if (fileInputRef.current) fileInputRef.current.value = '';
+              setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'done', progress: 100 } : t));
+              // Remove done tasks after a delay
+              setTimeout(() => {
+                  setTasks(prev => {
+                      const updated = prev.filter(t => t.id !== taskId);
+                      if (updated.length === 0) setShowPopup(false);
+                      return updated;
+                  });
+              }, 3000);
           } else {
-             console.error('Upload failed:', xhr.responseText);
-             alert(`Upload failed: Server responded with ${xhr.status}`);
+              setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'error', error: `Server error ${xhr.status}` } : t));
           }
         });
 
         xhr.addEventListener("error", () => {
-          setIsUploading(false);
-          setUploadProgress(null);
-          console.error('Upload error');
-          alert("Upload failed due to a network error.");
+            setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'error', error: 'Network error' } : t));
         });
 
         xhr.addEventListener("abort", () => {
-          setIsUploading(false);
-          setUploadProgress(null);
+            setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'error', error: 'Aborted' } : t));
         });
 
         xhr.open("POST", `${cleanServerUrl}/upload`);
-        formData.append('password', roomPassword || '');
         xhr.send(formData);
     };
 
-    // Expose drop handler to parent if needed, or handle here. 
-    // For this design, the drop zone is separate. We'll reuse the input ref.
+    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+        handleFiles(files);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const activeTasks = tasks.filter(t => t.status !== 'done' && t.status !== 'error');
+    const isUploading = activeTasks.length > 0;
+    const totalProgress = tasks.length > 0 ? tasks.reduce((acc, t) => acc + t.progress, 0) / tasks.length : 0;
 
     return (
         <div className="relative">
@@ -114,25 +146,20 @@ const UploadControl: React.FC<{ serverUrl: string, roomName: string, roomPasswor
                 onChange={handleUpload}
                 className="hidden"
                 id="file-upload"
+                multiple
             />
             <label 
-                htmlFor={isUploading || encryptionStatus === 'encrypting' ? undefined : "file-upload"}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold cursor-pointer transition-all shadow-[0_0_20px_rgba(236,72,153,0.3)] hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] whitespace-nowrap relative overflow-hidden ${isUploading || encryptionStatus === 'encrypting' ? 'bg-gray-800 text-white cursor-default w-48 justify-center' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:brightness-110'}`}
+                htmlFor="file-upload"
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold cursor-pointer transition-all shadow-[0_0_20px_rgba(236,72,153,0.3)] hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] whitespace-nowrap relative overflow-hidden ${isUploading ? 'bg-gray-800 text-white cursor-default w-48 justify-center' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:brightness-110'}`}
             >
-                {encryptionStatus === 'encrypting' ? (
+                {isUploading ? (
                     <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span className="text-xs font-mono animate-pulse">Encrypting...</span>
-                    </>
-                ) : isUploading && uploadProgress ? (
-                    <>
-                       <div 
+                        <div 
                             className="absolute left-0 top-0 bottom-0 bg-white/20 transition-all duration-200" 
-                            style={{ width: `${(uploadProgress.loaded / uploadProgress.total) * 100}%` }}
-                       />
-                       <span className="relative z-10 text-xs font-mono animate-pulse">
-                           {bytesToMB(uploadProgress.loaded)} / {bytesToMB(uploadProgress.total)} MB
-                       </span>
+                            style={{ width: `${totalProgress}%` }}
+                        />
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin relative z-10" />
+                        <span className="relative z-10 text-xs font-mono animate-pulse">Uploading {activeTasks.length}...</span>
                     </>
                 ) : (
                     <>
@@ -141,9 +168,45 @@ const UploadControl: React.FC<{ serverUrl: string, roomName: string, roomPasswor
                     </>
                 )}
             </label>
+
+            {/* Status Popup */}
+            {showPopup && tasks.length > 0 && (
+                <div className="absolute top-full right-0 mt-2 w-80 bg-[rgb(var(--hack-surface))] border border-[rgb(var(--hack-border))] rounded-xl shadow-2xl overflow-hidden z-50">
+                    <div className="flex justify-between items-center p-3 border-b border-[rgb(var(--hack-border))] bg-[rgb(var(--hack-surface))]/50 font-bold text-sm">
+                        <span>Uploads ({tasks.filter(t => t.status === 'done').length}/{tasks.length})</span>
+                        <button onClick={() => setShowPopup(false)} className="p-1 hover:bg-[rgb(var(--hack-text))]/10 rounded-lg text-[rgb(var(--hack-text))]/50 hover:text-[rgb(var(--hack-text))] transition-colors">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                    <div className="max-h-60 overflow-y-auto custom-scrollbar p-2 space-y-2">
+                        {tasks.map(task => (
+                            <div key={task.id} className="bg-[rgb(var(--hack-surface))]/50 border border-[rgb(var(--hack-border))]/50 rounded-lg p-2 text-xs">
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="truncate max-w-[180px] font-medium" title={task.file.name}>{task.file.name}</span>
+                                    <span className="text-[10px] uppercase font-bold">
+                                        {task.status === 'pending' && <span className="text-gray-400">Pending</span>}
+                                        {task.status === 'encrypting' && <span className="text-purple-400 animate-pulse">Encrypting</span>}
+                                        {task.status === 'uploading' && <span className="text-blue-400">{Math.round(task.progress)}%</span>}
+                                        {task.status === 'done' && <span className="text-green-400">Done</span>}
+                                        {task.status === 'error' && <span className="text-red-400" title={task.error}>Error</span>}
+                                    </span>
+                                </div>
+                                {(task.status === 'uploading' || task.status === 'encrypting') && (
+                                    <div className="h-1.5 w-full bg-[rgb(var(--hack-border))] rounded-full overflow-hidden">
+                                        <div 
+                                            className={`h-full transition-all duration-200 ${task.status === 'encrypting' ? 'bg-purple-500 w-full animate-pulse' : 'bg-blue-500'}`}
+                                            style={{ width: task.status === 'uploading' ? `${task.progress}%` : '100%' }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
-};
+});
 
 // Helper to get file icon and type label
 const getFileInfo = (fileName: string) => {
@@ -185,6 +248,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
   const [isCategorizing, setIsCategorizing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+  const uploadControlRef = useRef<UploadControlRef>(null);
   
   // Section State
   const [selectedSectionId, setSelectedSectionId] = useState<string | null | 'all'>('all');
@@ -227,33 +291,87 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
       }
   };
 
+  const handleRevert = async (sourceFileName: string, targetFileName: string) => {
+      if (!confirm(`Are you sure you want to revert ${targetFileName} to the version ${sourceFileName}?`)) return;
+      
+      try {
+          const response = await fetch(`${serverUrl}/upload/${roomName}/${sourceFileName}/revert`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': roomPassword || ''
+              },
+              body: JSON.stringify({ targetFilename: targetFileName })
+          });
+          
+          if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(errorText || 'Failed to revert file');
+          }
+      } catch (error) {
+          console.error('Revert error:', error);
+          alert('Failed to revert file: ' + (error instanceof Error ? error.message : String(error)));
+      }
+  };
+
+  const groupedFiles = useMemo(() => {
+      const groups: Record<string, SharedFile[]> = {};
+      
+      files.forEach(file => {
+          const lastDotIndex = file.name.lastIndexOf('.');
+          const hasExt = lastDotIndex !== -1 && lastDotIndex !== 0;
+          const ext = hasExt ? file.name.substring(lastDotIndex) : '';
+          const nameWithoutExt = hasExt ? file.name.substring(0, lastDotIndex) : file.name;
+          
+          let baseName = file.name;
+          const match = nameWithoutExt.match(/(.*)(_v\d+)$/);
+          
+          if (match) {
+              baseName = `${match[1]}${ext}`;
+          }
+          
+          if (!groups[baseName]) {
+              groups[baseName] = [];
+          }
+          groups[baseName].push(file);
+      });
+      
+      return Object.values(groups).map(group => {
+          group.sort((a, b) => b.uploadedAt - a.uploadedAt);
+          return {
+              mainFile: group[0],
+              versions: group.slice(1)
+          };
+      });
+  }, [files]);
+
   const processedFiles = useMemo(() => {
-    let result = [...files];
+    let result = [...groupedFiles];
 
     if (searchQuery) {
         const lowerQ = searchQuery.toLowerCase();
-        result = result.filter(f => f.name.toLowerCase().includes(lowerQ));
+        result = result.filter(g => g.mainFile.name.toLowerCase().includes(lowerQ));
     }
 
     if (activeFilter !== 'All') {
-        result = result.filter(f => {
-            const info = getFileInfo(f.name);
+        result = result.filter(g => {
+            const info = getFileInfo(g.mainFile.name);
             return info.label === activeFilter || (activeFilter === 'TypeScript' && info.label === 'React TS') || (activeFilter === 'JavaScript' && info.label === 'React JS');
         });
     }
 
     result.sort((a, b) => {
         switch(sortOrder) {
-            case 'newest': return b.uploadedAt - a.uploadedAt;
-            case 'oldest': return a.uploadedAt - b.uploadedAt;
-            case 'name': return a.name.localeCompare(b.name);
-            case 'size': return b.size - a.size;
+            case 'newest': return b.mainFile.uploadedAt - a.mainFile.uploadedAt;
+            case 'oldest': return a.mainFile.uploadedAt - b.mainFile.uploadedAt;
+            case 'name': return a.mainFile.name.localeCompare(b.mainFile.name);
+            case 'size': return b.mainFile.size - a.mainFile.size;
             default: return 0;
         }
     });
 
     return result;
-  }, [files, searchQuery, sortOrder, activeFilter]);
+  }, [groupedFiles, searchQuery, sortOrder, activeFilter]);
 
   // Filter by Section
   const displayedFiles = useMemo(() => {
@@ -262,13 +380,13 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
       if (selectedSectionId === null) {
           // Uncategorized: files not in any section
           const categorizedFileNames = new Set(sections.flatMap(s => s.itemIds || []));
-          return processedFiles.filter(f => !categorizedFileNames.has(f.name));
+          return processedFiles.filter(g => !categorizedFileNames.has(g.mainFile.name));
       }
 
       const section = sections.find(s => s.id === selectedSectionId);
       if (!section || !section.itemIds) return [];
       
-      return processedFiles.filter(f => section.itemIds?.includes(f.name));
+      return processedFiles.filter(g => section.itemIds?.includes(g.mainFile.name));
   }, [processedFiles, selectedSectionId, sections]);
 
   const handleAiCategorize = async () => {
@@ -369,11 +487,8 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
       e.preventDefault();
       e.stopPropagation();
       setDragActive(false);
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-          const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-          if (fileInput) {
-              alert("Please use the Upload Data button for now. Drag and drop logic needs hoisting.");
-          }
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          uploadControlRef.current?.uploadFiles(Array.from(e.dataTransfer.files));
       }
   };
 
@@ -461,7 +576,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                     <Icons.Zap className="w-4 h-4" />
                     {isCategorizing ? 'Analyzing...' : 'AI Categorize'}
                 </button>
-                <UploadControl serverUrl={serverUrl} roomName={roomName} roomPassword={roomPassword} encryptionEnabled={encryptionEnabled} />
+                <UploadControl ref={uploadControlRef} serverUrl={serverUrl} roomName={roomName} roomPassword={roomPassword} encryptionEnabled={encryptionEnabled} />
             </div>
         </div>
 
@@ -630,60 +745,106 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                 {/* File List */}
                 <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                     <AnimatePresence mode="popLayout">
-                        {displayedFiles.map((file) => {
+                        {displayedFiles.map((group) => {
+                            const file = group.mainFile;
                             const info = getFileInfo(file.name);
                             const Icon = info.icon;
+                            const hasVersions = group.versions.length > 0;
                             return (
-                                <motion.div
-                                    key={file.name}
-                                    layout
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    draggable
-                                    onDragStart={(e) => handleFileDragStart(e as any, file.name)}
-                                    className="group flex items-center gap-4 p-3 bg-[rgb(var(--hack-surface))] border border-[rgb(var(--hack-border))] rounded-xl hover:border-[rgb(var(--hack-primary))]/30 transition-all hover:shadow-[0_0_20px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing"
-                                >
-                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${info.bg} border ${info.border}`}>
-                                        <Icon className={`w-5 h-5 ${info.color}`} />
-                                    </div>
-                                    
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-bold text-[rgb(var(--hack-text))] truncate text-sm mb-0.5">{file.name}</h4>
-                                        <div className="flex items-center gap-3 text-[10px] text-[rgb(var(--hack-text))]/50 font-mono">
-                                            <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                                            <span className={`px-1.5 py-0.5 rounded ${info.bg} ${info.color} border ${info.border} uppercase`}>
-                                                {info.label}
-                                            </span>
-                                            <span className="hidden sm:inline">{formatTimeAgo(file.uploadedAt)}</span>
+                                <div key={file.name} className="flex flex-col gap-2">
+                                    <motion.div
+                                        layout
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        draggable
+                                        onDragStart={(e) => handleFileDragStart(e as any, file.name)}
+                                        className="group flex items-center gap-4 p-3 bg-[rgb(var(--hack-surface))] border border-[rgb(var(--hack-border))] rounded-xl hover:border-[rgb(var(--hack-primary))]/30 transition-all hover:shadow-[0_0_20px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing"
+                                    >
+                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${info.bg} border ${info.border}`}>
+                                            <Icon className={`w-5 h-5 ${info.color}`} />
                                         </div>
-                                    </div>
+                                        
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-[rgb(var(--hack-text))] truncate text-sm mb-0.5">{file.name}</h4>
+                                            <div className="flex items-center gap-3 text-[10px] text-[rgb(var(--hack-text))]/50 font-mono">
+                                                <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                                                <span className={`px-1.5 py-0.5 rounded ${info.bg} ${info.color} border ${info.border} uppercase`}>
+                                                    {info.label}
+                                                </span>
+                                                <span className="hidden sm:inline">{formatTimeAgo(file.uploadedAt)}</span>
+                                                {hasVersions && (
+                                                    <span className="px-1.5 py-0.5 rounded bg-[rgb(var(--hack-primary))]/10 text-[rgb(var(--hack-primary))] border border-[rgb(var(--hack-primary))]/30">
+                                                        {group.versions.length} older version{group.versions.length > 1 ? 's' : ''}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <button 
-                                            onClick={() => handleDownload(file.name)}
-                                            disabled={downloadingFile === file.name}
-                                            className="p-2 rounded-lg bg-[rgb(var(--hack-text))]/5 hover:bg-[rgb(var(--hack-text))]/10 text-[rgb(var(--hack-text))]/40 hover:text-[rgb(var(--hack-text))] transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                                            title="Download"
-                                        >
-                                            {downloadingFile === file.name ? (
-                                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                            ) : (
-                                                <Download className="w-4 h-4" />
-                                            )}
-                                        </button>
-                                        
-                                        {/* Move to Section Dropdown could go here, but Drag & Drop is implemented */}
-                                        
-                                        <button 
-                                            onClick={() => onFileDelete(file.name)} 
-                                            className="p-2 rounded-lg bg-[rgb(var(--hack-danger))]/10 hover:bg-[rgb(var(--hack-danger))]/20 text-[rgb(var(--hack-danger))] hover:text-[rgb(var(--hack-danger))]/80 transition-colors opacity-0 group-hover:opacity-100"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </motion.div>
+                                        <div className="flex items-center gap-2">
+                                            <button 
+                                                onClick={() => handleDownload(file.name)}
+                                                disabled={downloadingFile === file.name}
+                                                className="p-2 rounded-lg bg-[rgb(var(--hack-text))]/5 hover:bg-[rgb(var(--hack-text))]/10 text-[rgb(var(--hack-text))]/40 hover:text-[rgb(var(--hack-text))] transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                                                title="Download"
+                                            >
+                                                {downloadingFile === file.name ? (
+                                                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                ) : (
+                                                    <Download className="w-4 h-4" />
+                                                )}
+                                            </button>
+                                            
+                                            <button 
+                                                onClick={() => onFileDelete(file.name)} 
+                                                className="p-2 rounded-lg bg-[rgb(var(--hack-danger))]/10 hover:bg-[rgb(var(--hack-danger))]/20 text-[rgb(var(--hack-danger))] hover:text-[rgb(var(--hack-danger))]/80 transition-colors opacity-0 group-hover:opacity-100"
+                                                title="Delete"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+
+                                    {hasVersions && (
+                                        <div className="pl-12 space-y-2 mb-2">
+                                            {group.versions.map(v => (
+                                                <div key={v.name} className="flex items-center gap-4 p-2 bg-[rgb(var(--hack-surface))]/50 border border-[rgb(var(--hack-border))]/50 rounded-lg text-sm">
+                                                    <div className="flex-1 min-w-0 flex items-center gap-3">
+                                                        <span className="text-[rgb(var(--hack-text))]/70 truncate">{v.name}</span>
+                                                        <span className="text-[10px] text-[rgb(var(--hack-text))]/40 font-mono">{formatTimeAgo(v.uploadedAt)}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => handleRevert(v.name, file.name)} 
+                                                            className="px-2 py-1 text-[10px] font-bold bg-[rgb(var(--hack-primary))]/10 text-[rgb(var(--hack-primary))] rounded hover:bg-[rgb(var(--hack-primary))]/20 transition-colors"
+                                                        >
+                                                            Revert
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDownload(v.name)} 
+                                                            disabled={downloadingFile === v.name}
+                                                            className="p-1.5 rounded bg-[rgb(var(--hack-text))]/5 hover:bg-[rgb(var(--hack-text))]/10 text-[rgb(var(--hack-text))]/40 hover:text-[rgb(var(--hack-text))] transition-colors disabled:opacity-50"
+                                                            title="Download"
+                                                        >
+                                                            {downloadingFile === v.name ? (
+                                                                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                            ) : (
+                                                                <Download className="w-3 h-3" />
+                                                            )}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => onFileDelete(v.name)} 
+                                                            className="p-1.5 rounded bg-[rgb(var(--hack-danger))]/10 hover:bg-[rgb(var(--hack-danger))]/20 text-[rgb(var(--hack-danger))] hover:text-[rgb(var(--hack-danger))]/80 transition-colors"
+                                                            title="Delete"
+                                                        >
+                                                            <Trash2 className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             );
                         })}
                     </AnimatePresence>
