@@ -54,7 +54,7 @@ if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
   envContent += `\nSESSION_SECRET=${newSecret}\n`;
   envChanged = true;
 }
-
+30
 if (envChanged) {
   fs.writeFileSync(envPath, envContent.trim() + '\n');
 }
@@ -785,6 +785,7 @@ async function startServer() {
       
       const room = rooms.get(roomName);
       if (!room || room.password !== password) {
+          if (req.file) fs.unlinkSync(req.file.path);
           return res.status(401).send('Unauthorized');
       }
 
@@ -793,29 +794,33 @@ async function startServer() {
       const targetName = `${roomName}---${originalName}`;
       const targetPath = path.join(uploadDir, targetName);
 
-      if (fs.existsSync(targetPath)) {
-          let counter = 1;
-          const ext = path.extname(originalName);
-          const base = path.basename(originalName, ext);
-          let backupPath = '';
-          
-          while (true) {
-              const versionedName = `${base}_v${counter}${ext}`;
-              backupPath = path.join(uploadDir, `${roomName}---${versionedName}`);
-              if (!fs.existsSync(backupPath)) break;
-              counter++;
+      try {
+          if (fs.existsSync(targetPath)) {
+              let counter = 1;
+              const ext = path.extname(originalName);
+              const base = path.basename(originalName, ext);
+              let backupPath = '';
+              
+              while (true) {
+                  const versionedName = `${base}_v${counter}${ext}`;
+                  backupPath = path.join(uploadDir, `${roomName}---${versionedName}`);
+                  if (!fs.existsSync(backupPath)) break;
+                  counter++;
+              }
+              
+              // Rename the existing file to the backup name
+              fs.renameSync(targetPath, backupPath);
           }
-          
-          // Rename the existing file to the backup name
-          fs.renameSync(targetPath, backupPath);
-      }
 
-      fs.rename(tempPath, targetPath, (err) => {
-          if (err) return res.status(500).send("Server error processing file");
+          fs.renameSync(tempPath, targetPath);
           const roomFiles = getRoomFiles(roomName);
           io.to(roomName).emit('files:sync', roomFiles);
           res.status(200).send({ message: 'File uploaded successfully' });
-      });
+      } catch (err) {
+          console.error("Upload error:", err);
+          if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+          res.status(500).send("Server error processing file");
+      }
   });
 
   app.post('/upload/:roomName/:filename/revert', (req, res) => {
@@ -1132,6 +1137,23 @@ async function startServer() {
                 console.log(`Relaying sync request to ${targetUserId} for room ${roomName}`);
                 hostSocket.emit('directory:resync-request');
             }
+        }
+    });
+
+    socket.on('directory:request-path', ({ roomName, targetUserId, path }) => {
+        const room = rooms.get(roomName);
+        if (room && room.directories[targetUserId]) {
+            const hostSocket = io.sockets.sockets.get(targetUserId);
+            if (hostSocket) {
+                hostSocket.emit('directory:path-request', { requesterId: socket.id, path });
+            }
+        }
+    });
+
+    socket.on('directory:path-result', ({ requesterId, path, children }) => {
+        const requesterSocket = io.sockets.sockets.get(requesterId);
+        if (requesterSocket) {
+            requesterSocket.emit('directory:path-result', { path, children });
         }
     });
 
