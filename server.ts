@@ -54,7 +54,7 @@ if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
   envContent += `\nSESSION_SECRET=${newSecret}\n`;
   envChanged = true;
 }
-30
+
 if (envChanged) {
   fs.writeFileSync(envPath, envContent.trim() + '\n');
 }
