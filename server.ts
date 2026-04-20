@@ -553,6 +553,7 @@ async function startServer() {
         directories: {} as DirectoryState,
         editorFiles: getFileTree(name), // Load from FS
         chatHistory: [] as ChatMessage[], // Chat History
+        whiteboard: [] as any[], // Whiteboard Stokes
         startTime: Date.now(),
         endTime: Date.now() + 24 * 60 * 60 * 1000,
         encryptionEnabled: true
@@ -1100,10 +1101,12 @@ async function startServer() {
           users: room.users,
           directories: room.directories || {},
           editorFiles: room.editorFiles || [],
+          whiteboard: room.whiteboard || [],
           encryptionEnabled: room.encryptionEnabled ?? true
       });
 
       socket.emit('chat:sync', room.chatHistory || []);
+      socket.emit('whiteboard:sync', room.whiteboard || []);
 
       io.to(name).emit('users:sync', room.users);
       io.to(name).emit('directory:sync', room.directories || {});
@@ -1180,6 +1183,41 @@ async function startServer() {
             saveDatabase(); 
             io.to(roomName).emit('users:sync', room.users);
             socketRoomMap.delete(socket.id);
+        }
+    });
+
+    socket.on('whiteboard:action', ({ action, data }) => {
+        const roomName = socketRoomMap.get(socket.id);
+        if (roomName) {
+            const room = rooms.get(roomName);
+            if (room) {
+                if (!room.whiteboard) room.whiteboard = [];
+                if (action === 'add') {
+                    room.whiteboard.push(data);
+                    if (room.whiteboard.length > 50000) {
+                        room.whiteboard.shift();
+                    }
+                } else if (action === 'update') {
+                    const idx = room.whiteboard.findIndex((item: any) => item.id === data.id);
+                    if (idx !== -1) {
+                        room.whiteboard[idx] = { ...room.whiteboard[idx], ...data };
+                    }
+                } else if (action === 'remove') {
+                    room.whiteboard = room.whiteboard.filter((item: any) => item.id !== data.id);
+                }
+                socket.to(roomName).emit('whiteboard:action', { action, data });
+            }
+        }
+    });
+
+    socket.on('whiteboard:clear', () => {
+        const roomName = socketRoomMap.get(socket.id);
+        if (roomName) {
+            const room = rooms.get(roomName);
+            if (room) {
+                room.whiteboard = [];
+                socket.to(roomName).emit('whiteboard:clear');
+            }
         }
     });
 

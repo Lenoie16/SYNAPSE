@@ -170,9 +170,69 @@ export const Kanban: React.FC<KanbanProps> = ({ tasks, setTasks }) => {
     const id = e.dataTransfer.getData('text/plain');
     
     if (id) {
-        setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+        setTasks(prev => {
+            const index = prev.findIndex(t => t.id === id);
+            if (index === -1) return prev;
+            const task = { ...prev[index], status };
+            const newTasks = prev.filter(t => t.id !== id);
+            newTasks.push(task);
+            return newTasks;
+        });
         showToast('TASK STATUS UPDATED');
     }
+  };
+
+  const handleTaskDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+    if (offsetY > rect.height / 2) {
+        e.currentTarget.classList.remove('drag-over-top');
+        e.currentTarget.classList.add('drag-over-bottom');
+    } else {
+        e.currentTarget.classList.remove('drag-over-bottom');
+        e.currentTarget.classList.add('drag-over-top');
+    }
+  };
+
+  const handleTaskDragLeave = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('drag-over-top');
+    e.currentTarget.classList.remove('drag-over-bottom');
+  };
+
+  const handleTaskDrop = (e: React.DragEvent, status: TaskStatus, targetId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('drag-over-top');
+    e.currentTarget.classList.remove('drag-over-bottom');
+
+    const id = e.dataTransfer.getData('text/plain');
+    if (!id || id === targetId) return;
+
+    setTasks(prev => {
+        const draggedTaskIndex = prev.findIndex(t => t.id === id);
+        if (draggedTaskIndex === -1) return prev;
+        
+        const draggedTask = { ...prev[draggedTaskIndex], status };
+        let newTasks = prev.filter(t => t.id !== id);
+        
+        const targetIndex = newTasks.findIndex(t => t.id === targetId);
+        if (targetIndex === -1) {
+            newTasks.push(draggedTask);
+        } else {
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            const offsetY = e.clientY - rect.top;
+            if (offsetY > rect.height / 2) {
+                newTasks.splice(targetIndex + 1, 0, draggedTask);
+            } else {
+                newTasks.splice(targetIndex, 0, draggedTask);
+            }
+        }
+        
+        return newTasks;
+    });
+    showToast('TASK REPOSITIONED');
   };
 
   // Modal
@@ -221,6 +281,9 @@ export const Kanban: React.FC<KanbanProps> = ({ tasks, setTasks }) => {
                 draggable
                 onDragStart={(e) => handleDragStart(e, task.id)}
                 onDragEnd={(e) => handleDragEnd(e, task.id)}
+                onDragOver={handleTaskDragOver}
+                onDragLeave={handleTaskDragLeave}
+                onDrop={(e) => handleTaskDrop(e, status, task.id)}
               >
                 <div className="kb-card-top">
                   <div className="kb-card-title">{task.title}</div>

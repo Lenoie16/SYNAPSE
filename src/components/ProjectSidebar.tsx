@@ -98,7 +98,7 @@ const FileTreeNode: React.FC<{
                 <Edit2 size={12} />
             </button>
             <button 
-                onClick={(e) => { e.stopPropagation(); if(confirm('Delete?')) onDelete(node.id); }}
+                onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
                 className="p-1 hover:text-red-400"
                 title="Delete"
             >

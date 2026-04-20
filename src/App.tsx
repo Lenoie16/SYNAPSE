@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { View, Task, Snippet, SharedFile, User, DirectoryState, Section, EditorNode, EditorFile, EditorFolder } from '@/types';
 import { Kanban } from '@/components/Kanban';
-import { BoilerplateGenerator } from '@/components/BoilerplateGenerator';
+
 import { SnippetVault } from '@/components/SnippetVault';
 
 import { DirectoryBrowser } from '@/components/DirectoryBrowser';
@@ -23,6 +23,7 @@ import { SubtleBackground } from '@/components/SubtleBackground';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ChatBox from '@/components/ChatBox';
+import { Whiteboard } from '@/components/Whiteboard';
 import { useGemini } from '@/hooks/useGemini';
 
 
@@ -44,6 +45,7 @@ const App: React.FC = () => {
   const [view, setView] = useState<View>('kanban');
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(true);
   const socketRef = useRef<Socket | null>(null);
   
   const [serverUrl, setServerUrl] = useState<string>(() => {
@@ -143,11 +145,17 @@ const App: React.FC = () => {
     socket.on('connect', () => {
       console.log('Socket connected');
       setIsConnected(true);
+      setIsConnecting(false);
     });
 
     socket.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
       setIsConnected(false);
+      setIsConnecting(false);
+    });
+
+    socket.on('connect_error', () => {
+      setIsConnecting(false);
     });
 
     // --- Room Auth Events ---
@@ -414,18 +422,14 @@ const App: React.FC = () => {
 
 
 
-  if (!roomName) {
-      return (
-          <Login 
-              onJoin={handleJoinRoom} 
-              error={authError} 
-              themeMode={themeMode}
-              toggleTheme={toggleTheme}
-          />
-      );
-  }
-
-  return (
+  const content = !roomName ? (
+      <Login 
+          onJoin={handleJoinRoom} 
+          error={authError} 
+          themeMode={themeMode}
+          toggleTheme={toggleTheme}
+      />
+  ) : (
     <div className="min-h-screen text-hack-text font-sans selection:bg-hack-primary selection:text-black flex flex-col animate-fade-in overflow-hidden relative pb-24 transition-colors duration-500 rounded-2xl shadow-lg">
       <SubtleBackground mode={themeMode} />
       
@@ -481,6 +485,18 @@ const App: React.FC = () => {
 
                     <div className="flex-1 backdrop-blur-sm border border-hack-border p-1 h-full overflow-hidden rounded-xl relative">
                         <AnimatePresence mode="wait">
+                            {view === 'whiteboard' && (
+                                <motion.div
+                                    key="whiteboard"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="h-full w-full"
+                                >
+                                    <Whiteboard socket={socketRef.current} roomName={roomName} />
+                                </motion.div>
+                            )}
                             {view === 'kanban' && (
                                 <motion.div
                                     key="kanban"
@@ -522,14 +538,12 @@ const App: React.FC = () => {
                                         sections={fileSections}
                                         onSectionsChange={handleUpdateFileSections}
                                         onFileDelete={(fileName) => {
-                                            if (confirm(`Are you sure you want to delete ${fileName}?`)) {
-                                                fetch(`/upload/${roomName}/${fileName}`, { 
-                                                    method: 'DELETE',
-                                                    headers: {
-                                                        'Authorization': accessKey || ''
-                                                    }
-                                                });
-                                            }
+                                            fetch(`/upload/${roomName}/${fileName}`, { 
+                                                method: 'DELETE',
+                                                headers: {
+                                                    'Authorization': accessKey || ''
+                                                }
+                                            });
                                         }}
                                         serverUrl={serverUrl}
                                         roomName={roomName}
@@ -790,6 +804,39 @@ const App: React.FC = () => {
       </div>
       <SpotlightNavbar currentView={view} onNavigate={setView} isMobile={isMobile} />
     </div>
+  );
+
+  return (
+    <>
+        {content}
+        {!isConnecting && !isConnected && (
+            <div className="fixed inset-0 z-[9999] backdrop-blur-xl bg-black/60 flex flex-col items-center justify-center p-4">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center flex flex-col items-center border border-red-500/30 bg-black/40 p-12 rounded-2xl shadow-[0_0_50px_rgba(239,68,68,0.2)]"
+                >
+                    <h2 className="text-6xl md:text-8xl font-black font-sans tracking-widest text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4">OFFLINE</h2>
+                    <p className="text-hack-muted font-mono mb-8 max-w-md text-sm leading-relaxed">
+                        Connection to Synapse server severed. Local systems isolated. Data synchronization halted.
+                    </p>
+                    <button 
+                        onClick={() => {
+                            setIsConnecting(true);
+                            if (socketRef.current) {
+                                socketRef.current.connect();
+                            } else {
+                                window.location.reload();
+                            }
+                        }}
+                        className="px-8 py-3 bg-red-500/10 border border-red-500 text-red-500 font-bold font-mono uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.5)] cursor-pointer"
+                    >
+                        Attempt Reconnection
+                    </button>
+                </motion.div>
+            </div>
+        )}
+    </>
   );
 };
 

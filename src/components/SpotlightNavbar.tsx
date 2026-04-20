@@ -1,7 +1,7 @@
 
 import React, { useRef, useState } from 'react';
 import { View } from '@/types';
-import { Kanban, Code, FileText, Folder, Zap, Settings, Shield, MessageSquare, Activity } from 'lucide-react';
+import { Kanban, Code, FileText, Folder, Zap, Settings, Shield, MessageSquare, Activity, PenTool, Archive } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface NavItem {
@@ -40,10 +40,12 @@ export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, o
   };
 
   const baseNavItems: NavItem[] = [
+    { id: 'whiteboard', icon: PenTool, label: 'Draw' },
     { id: 'kanban', icon: Kanban, label: 'Board' },
-    { id: 'snippets', icon: Code, label: 'Vault' },
+    { id: 'snippets', icon: Archive, label: 'Vault' },
     { id: 'files', icon: FileText, label: 'Data' },
     { id: 'directory', icon: Folder, label: 'Dirs' },
+    
     { id: 'code-editor', icon: Code, label: 'Editor' },
     { id: 'settings', icon: Settings, label: 'Sys' },
     { id: 'admin', icon: Shield, label: 'Admin' },

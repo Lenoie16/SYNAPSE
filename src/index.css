@@ -1449,6 +1449,16 @@ canvas#pchart { width:100%; display:block; }
     transform: scale(0.96);
 }
 
+.kb-task-card.drag-over-top {
+    border-top: 2px solid var(--kb-accent-pink);
+    margin-top: 4px;
+}
+
+.kb-task-card.drag-over-bottom {
+    border-bottom: 2px solid var(--kb-accent-pink);
+    margin-bottom: 4px;
+}
+
 .kb-task-card.drag-over {
     border-color: rgba(155, 77, 255, 0.6);
     background: rgba(155, 77, 255, 0.08);

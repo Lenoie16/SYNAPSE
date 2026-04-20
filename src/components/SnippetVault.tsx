@@ -430,9 +430,7 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
 
   const deleteSnippet = (e: React.MouseEvent, id: string) => {
       e.stopPropagation();
-      if(window.confirm('Delete this snippet?')) {
-        setSnippets(prev => prev.filter(s => s.id !== id));
-      }
+      setSnippets(prev => prev.filter(s => s.id !== id));
   };
 
   const editSnippet = (e: React.MouseEvent, snippet: Snippet) => {

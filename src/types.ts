@@ -69,7 +69,7 @@ export interface BoilerplateConfig {
   };
 }
 
-export type View = 'kanban' | 'snippets' | 'boilerplate' | 'settings' | 'files' | 'directory' | 'admin' | 'code-editor' | 'chat' | 'diagnostics';
+export type View = 'whiteboard' | 'kanban' | 'snippets' | 'boilerplate' | 'settings' | 'files' | 'directory' | 'admin' | 'code-editor' | 'chat' | 'diagnostics';
 
 export interface PressureAnalysis {
   level: number; // 0-100
