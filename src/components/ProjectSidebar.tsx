@@ -11,7 +11,10 @@ interface ProjectSidebarProps {
   onRename: (nodeId: string, newName: string) => void;
   onDownloadZip: () => void;
   selectedFileId: string | null;
+<<<<<<< HEAD
   onCloseMobile?: () => void;
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 }
 
 const FileTreeNode: React.FC<{
@@ -98,7 +101,11 @@ const FileTreeNode: React.FC<{
                 <Edit2 size={12} />
             </button>
             <button 
+<<<<<<< HEAD
                 onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
+=======
+                onClick={(e) => { e.stopPropagation(); if(confirm('Delete?')) onDelete(node.id); }}
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                 className="p-1 hover:text-red-400"
                 title="Delete"
             >
@@ -129,10 +136,17 @@ const FileTreeNode: React.FC<{
 };
 
 export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({ 
+<<<<<<< HEAD
   files, onSelectFile, onCreateFile, onCreateFolder, onDelete, onRename, onDownloadZip, selectedFileId, onCloseMobile 
 }) => {
   return (
     <div className="h-full flex flex-col bg-[#0D0D0D] border-r border-white/10 w-full md:w-64">
+=======
+  files, onSelectFile, onCreateFile, onCreateFolder, onDelete, onRename, onDownloadZip, selectedFileId 
+}) => {
+  return (
+    <div className="h-full flex flex-col bg-[#0D0D0D] border-r border-white/10 w-64">
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       <div className="p-4 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2 text-white font-medium">
             <Cloud size={16} className="text-blue-400" />
@@ -160,6 +174,7 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
             >
                 <Download size={16} />
             </button>
+<<<<<<< HEAD
             {onCloseMobile && (
                 <button 
                     onClick={onCloseMobile}
@@ -169,6 +184,8 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
                     ✕
                 </button>
             )}
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         </div>
       </div>
       

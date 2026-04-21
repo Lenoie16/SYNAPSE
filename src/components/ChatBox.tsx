@@ -11,10 +11,16 @@ interface ChatBoxProps {
   username: string;
   roomPassword?: string; // Add roomPassword prop
   encryptionEnabled?: boolean;
+<<<<<<< HEAD
   fullHeight?: boolean;
 }
 
 const ChatBox: React.FC<ChatBoxProps> = ({ socket, roomName, username, roomPassword = '', encryptionEnabled, fullHeight = false }) => {
+=======
+}
+
+const ChatBox: React.FC<ChatBoxProps> = ({ socket, roomName, username, roomPassword = '', encryptionEnabled }) => {
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
@@ -107,7 +113,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ socket, roomName, username, roomPassw
   };
 
   return (
+<<<<<<< HEAD
     <div className={`flex flex-col bg-[rgb(var(--hack-surface))]/80 border border-[rgb(var(--hack-border))] rounded-sm overflow-hidden mt-4 backdrop-blur-md animate-fade-in shadow-2xl ${fullHeight ? 'flex-1 h-full mt-0' : 'h-64'}`}>
+=======
+    <div className="flex flex-col h-64 bg-[rgb(var(--hack-surface))]/80 border border-[rgb(var(--hack-border))] rounded-sm overflow-hidden mt-4 backdrop-blur-md animate-fade-in shadow-2xl">
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       <div className="bg-[rgb(var(--hack-text))]/5 border-b border-[rgb(var(--hack-border))] p-3 px-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--hack-accent))] animate-pulse shadow-[0_0_8px_rgba(var(--hack-accent),0.6)]"></div>

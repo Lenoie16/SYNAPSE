@@ -44,6 +44,7 @@
 ::-webkit-scrollbar-thumb { background: rgb(var(--hack-border)); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgb(var(--hack-primary)); }
 
+<<<<<<< HEAD
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -52,6 +53,8 @@
   scrollbar-width: none;  /* Firefox */
 }
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 /* CRT Scanline Effect - Subtle */
 .scanlines {
   position: fixed;
@@ -259,11 +262,15 @@
 .bg-noise {
   position:absolute; inset:-50%; width:200%; height:200%; opacity:0.022;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+<<<<<<< HEAD
 }
 @media (min-width: 768px) {
   .bg-noise {
     animation:noisedrift 0.5s steps(2) infinite;
   }
+=======
+  animation:noisedrift 0.5s steps(2) infinite;
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 }
 @keyframes noisedrift { 0%{transform:translate(0,0)} 25%{transform:translate(-1%,-2%)} 50%{transform:translate(2%,1%)} 75%{transform:translate(-2%,2%)} }
 
@@ -586,9 +593,12 @@ canvas#pchart { width:100%; display:block; }
 .settings-section-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem;
 }
+<<<<<<< HEAD
 @media (max-width: 768px) {
   .settings-section-grid { grid-template-columns: 1fr; }
 }
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 .settings-section-grid.full { grid-template-columns: 1fr; }
 
 .st-card {
@@ -1262,6 +1272,7 @@ canvas#pchart { width:100%; display:block; }
     overflow: hidden;
 }
 
+<<<<<<< HEAD
 @media (max-width: 1024px) {
     .kb-board {
         display: flex;
@@ -1278,6 +1289,8 @@ canvas#pchart { width:100%; display:block; }
     }
 }
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 .kb-column {
     background: var(--kb-bg-column);
     border: 1px solid var(--kb-border-subtle);
@@ -1449,6 +1462,7 @@ canvas#pchart { width:100%; display:block; }
     transform: scale(0.96);
 }
 
+<<<<<<< HEAD
 .kb-task-card.drag-over-top {
     border-top: 2px solid var(--kb-accent-pink);
     margin-top: 4px;
@@ -1459,6 +1473,8 @@ canvas#pchart { width:100%; display:block; }
     margin-bottom: 4px;
 }
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 .kb-task-card.drag-over {
     border-color: rgba(155, 77, 255, 0.6);
     background: rgba(155, 77, 255, 0.08);
@@ -2373,12 +2389,16 @@ canvas#pchart { width:100%; display:block; }
 .fi {
   position: absolute;
   opacity: 0;
+<<<<<<< HEAD
 }
 
 @media (min-width: 768px) {
   .fi {
     animation: fiFloat var(--dur) ease-in-out infinite;
   }
+=======
+  animation: fiFloat var(--dur) ease-in-out infinite;
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 }
 
 @keyframes fiFloat {
@@ -2398,12 +2418,16 @@ canvas#pchart { width:100%; display:block; }
   height: 200%;
   opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+<<<<<<< HEAD
 }
 
 @media (min-width: 768px) {
   .grain {
     animation: grainShift 0.4s steps(2) infinite;
   }
+=======
+  animation: grainShift 0.4s steps(2) infinite;
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 }
 
 @keyframes grainShift {

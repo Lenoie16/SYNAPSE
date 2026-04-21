@@ -259,7 +259,11 @@ const SectionNavItem: React.FC<{
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={() => setIsOver(false)}
+<<<<<<< HEAD
             className={`w-full shrink-0 text-left p-3 rounded-lg border text-sm font-mono transition-all flex items-center justify-between gap-2 ${
+=======
+            className={`w-full text-left p-3 rounded-lg border text-sm font-mono transition-all flex items-center justify-between ${
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                 isActive 
                 ? 'bg-hack-primary/10 border-hack-primary text-hack-text shadow-[0_0_10px_rgba(var(--hack-primary),0.2)]' 
                 : 'bg-hack-bg border-hack-border text-gray-400 hover:border-gray-500'
@@ -430,7 +434,13 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
 
   const deleteSnippet = (e: React.MouseEvent, id: string) => {
       e.stopPropagation();
+<<<<<<< HEAD
       setSnippets(prev => prev.filter(s => s.id !== id));
+=======
+      if(window.confirm('Delete this snippet?')) {
+        setSnippets(prev => prev.filter(s => s.id !== id));
+      }
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   };
 
   const editSnippet = (e: React.MouseEvent, snippet: Snippet) => {
@@ -560,11 +570,19 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
         </div>
       )}
 
+<<<<<<< HEAD
       <div className="flex-1 flex flex-col md:grid md:grid-cols-5 gap-6 overflow-hidden pb-2">
         {/* Navigator Sidebar */}
         <div className="md:col-span-1 glass-panel rounded-xl p-4 flex flex-col h-48 md:h-full shrink-0">
             <h3 className="text-xs font-bold text-hack-muted uppercase tracking-widest mb-2 md:mb-4 px-1">Sections</h3>
             <div className="flex flex-col overflow-y-auto space-y-2 pr-1 custom-scrollbar flex-1">
+=======
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-6 overflow-hidden pb-2">
+        {/* Navigator Sidebar */}
+        <div className="md:col-span-1 glass-panel rounded-xl p-4 flex flex-col h-full">
+            <h3 className="text-xs font-bold text-hack-muted uppercase tracking-widest mb-4 px-1">Sections</h3>
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                 <SectionNavItem 
                     label="All Snippets"
                     isActive={selectedSectionId === 'all'}
@@ -580,7 +598,11 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
                     onDrop={(e) => handleDrop(e, null)}
                     snippetCount={uncategorizedCount}
                 />
+<<<<<<< HEAD
                 <div className="hidden md:block my-3 border-t border-white/10"></div>
+=======
+                <div className="my-3 border-t border-white/10"></div>
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                 {sections.map(section => (
                     <SectionNavItem 
                         key={section.id}
@@ -592,7 +614,11 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
                     />
                 ))}
             </div>
+<<<<<<< HEAD
             <div className="mt-2 md:mt-4 pt-2 md:pt-4 border-t border-white/10 shrink-0">
+=======
+            <div className="mt-4 pt-4 border-t border-white/10">
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                 {isAddingSection ? (
                     <div onBlur={handleAddSectionBlur} className="p-1 animate-fade-in">
                         <input

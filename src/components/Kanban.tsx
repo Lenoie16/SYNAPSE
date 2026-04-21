@@ -170,6 +170,7 @@ export const Kanban: React.FC<KanbanProps> = ({ tasks, setTasks }) => {
     const id = e.dataTransfer.getData('text/plain');
     
     if (id) {
+<<<<<<< HEAD
         setTasks(prev => {
             const index = prev.findIndex(t => t.id === id);
             if (index === -1) return prev;
@@ -178,10 +179,14 @@ export const Kanban: React.FC<KanbanProps> = ({ tasks, setTasks }) => {
             newTasks.push(task);
             return newTasks;
         });
+=======
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t));
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         showToast('TASK STATUS UPDATED');
     }
   };
 
+<<<<<<< HEAD
   const handleTaskDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -235,6 +240,8 @@ export const Kanban: React.FC<KanbanProps> = ({ tasks, setTasks }) => {
     showToast('TASK REPOSITIONED');
   };
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   // Modal
   const openModal = (col: TaskStatus) => {
     setModalColumn(col);
@@ -281,9 +288,12 @@ export const Kanban: React.FC<KanbanProps> = ({ tasks, setTasks }) => {
                 draggable
                 onDragStart={(e) => handleDragStart(e, task.id)}
                 onDragEnd={(e) => handleDragEnd(e, task.id)}
+<<<<<<< HEAD
                 onDragOver={handleTaskDragOver}
                 onDragLeave={handleTaskDragLeave}
                 onDrop={(e) => handleTaskDrop(e, status, task.id)}
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
               >
                 <div className="kb-card-top">
                   <div className="kb-card-title">{task.title}</div>

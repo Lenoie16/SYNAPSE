@@ -1,7 +1,11 @@
 
+<<<<<<< HEAD
 import 'dotenv/config';
 import express from 'express';
 import crypto from 'crypto';
+=======
+import express from 'express';
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
@@ -37,6 +41,7 @@ interface CustomRequest extends Request {
 
 import jwt from 'jsonwebtoken';
 
+<<<<<<< HEAD
 const envPath = path.join(process.cwd(), '.env');
 let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
 let envChanged = false;
@@ -68,6 +73,9 @@ if (!JWT_SECRET || JWT_SECRET.length < 32) {
 if (!SESSION_SECRET || SESSION_SECRET.length < 32) {
   throw new Error('SESSION_SECRET env var is required and must be at least 32 characters');
 }
+=======
+const JWT_SECRET = process.env.JWT_SECRET || 'synapse-jwt-secret-key-change-in-prod';
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
 // Fix for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -259,6 +267,7 @@ async function startServer() {
       }
 
       if (roomName && filePath) {
+<<<<<<< HEAD
           const safeRoot = path.resolve(PROJECTS_DIR, roomName);
           const fullPath = path.resolve(safeRoot, filePath);
           
@@ -268,6 +277,9 @@ async function startServer() {
               return;
           }
           
+=======
+          const fullPath = path.join(PROJECTS_DIR, roomName, filePath);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
           if (fs.existsSync(fullPath)) {
              try {
                  const content = readFileContent(fullPath);
@@ -300,6 +312,7 @@ async function startServer() {
 
         // Persist content to Disk
         if (roomName && filePath) {
+<<<<<<< HEAD
             const safeRoot = path.resolve(PROJECTS_DIR, roomName);
             const fullPath = path.resolve(safeRoot, filePath);
             
@@ -308,6 +321,9 @@ async function startServer() {
                 return;
             }
             
+=======
+            const fullPath = path.join(PROJECTS_DIR, roomName!, filePath!);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
             const content = doc.getText('monaco').toString();
             
             // Ensure directory exists (it should, but safety first)
@@ -437,7 +453,11 @@ async function startServer() {
 
   // --- ADMIN & SESSION CONFIGURATION ---
   const sessionMiddleware = session({
+<<<<<<< HEAD
       secret: SESSION_SECRET,
+=======
+      secret: process.env.SESSION_SECRET || 'your-default-super-secret-key',
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       resave: false,
       saveUninitialized: false, // Changed to false to reduce empty sessions
       proxy: true, // Trust the proxy settings
@@ -484,7 +504,11 @@ async function startServer() {
   });
 
   const upload = multer({ storage: storage });
+<<<<<<< HEAD
   // Removed static middleware: app.use('/uploads', express.static(uploadDir));
+=======
+  app.use('/uploads', express.static(uploadDir));
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
   // --- ROOM & ADMIN STATE MANAGEMENT ---
   // let rooms = new Map(); // Moved up
@@ -553,7 +577,10 @@ async function startServer() {
         directories: {} as DirectoryState,
         editorFiles: getFileTree(name), // Load from FS
         chatHistory: [] as ChatMessage[], // Chat History
+<<<<<<< HEAD
         whiteboard: [] as any[], // Whiteboard Stokes
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         startTime: Date.now(),
         endTime: Date.now() + 24 * 60 * 60 * 1000,
         encryptionEnabled: true
@@ -695,7 +722,11 @@ async function startServer() {
 
   // --- ADMIN CONSOLE API ---
   app.get('/api/stats', requireAdminLogin, (req: CustomRequest, res: Response) => {
+<<<<<<< HEAD
       const roomData: { name: string; userCount: number; host: string }[] = [];
+=======
+      const roomData: { name: string; userCount: number; host: string; password?: string }[] = [];
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       let totalUsers = 0;
 
       rooms.forEach((room, name) => {
@@ -703,7 +734,12 @@ async function startServer() {
           roomData.push({
               name: name,
               userCount: room.users.length,
+<<<<<<< HEAD
               host: room.host
+=======
+              host: room.host,
+              password: room.password 
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
           });
       });
 
@@ -778,6 +814,7 @@ async function startServer() {
 
   // --- PUBLIC FILE API ---
   app.post('/upload', upload.single('file'), (req: CustomRequest, res: Response) => {
+<<<<<<< HEAD
       if (!req.file || !req.body.roomName || req.body.password === undefined) {
           return res.status(400).send('Missing file, roomName, or password');
       }
@@ -882,10 +919,27 @@ async function startServer() {
           console.error("Error reverting file:", err);
           res.status(500).send('Error reverting file');
       }
+=======
+      if (!req.file || !req.body.roomName) {
+          return res.status(400).send('Missing file or roomName');
+      }
+      const roomName: string = req.body.roomName;
+      const tempPath = req.file.path;
+      const targetName = `${roomName}---${req.file.originalname}`;
+      const targetPath = path.join(uploadDir, targetName);
+
+      fs.rename(tempPath, targetPath, (err) => {
+          if (err) return res.status(500).send("Server error processing file");
+          const roomFiles = getRoomFiles(roomName);
+          io.to(roomName).emit('files:sync', roomFiles);
+          res.status(200).send({ message: 'File uploaded successfully' });
+      });
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   });
 
   app.delete('/upload/:roomName/:filename', (req, res) => {
       const { roomName, filename } = req.params;
+<<<<<<< HEAD
       const password = req.headers['authorization'];
       
       if (password === undefined) {
@@ -897,6 +951,8 @@ async function startServer() {
           return res.status(401).send('Unauthorized');
       }
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       const realFilename = `${roomName}---${filename}`;
       const filePath = path.join(uploadDir, realFilename);
       
@@ -918,6 +974,7 @@ async function startServer() {
 
   app.get('/uploads/:roomName/:filename', (req, res) => {
       const { roomName, filename } = req.params;
+<<<<<<< HEAD
       const password = req.query.password as string;
       
       if (password === undefined) {
@@ -929,6 +986,8 @@ async function startServer() {
           return res.status(401).send('Unauthorized');
       }
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       const realFilename = `${roomName}---${filename}`;
       const filePath = path.join(uploadDir, realFilename);
       
@@ -1101,12 +1160,18 @@ async function startServer() {
           users: room.users,
           directories: room.directories || {},
           editorFiles: room.editorFiles || [],
+<<<<<<< HEAD
           whiteboard: room.whiteboard || [],
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
           encryptionEnabled: room.encryptionEnabled ?? true
       });
 
       socket.emit('chat:sync', room.chatHistory || []);
+<<<<<<< HEAD
       socket.emit('whiteboard:sync', room.whiteboard || []);
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
       io.to(name).emit('users:sync', room.users);
       io.to(name).emit('directory:sync', room.directories || {});
@@ -1143,6 +1208,7 @@ async function startServer() {
         }
     });
 
+<<<<<<< HEAD
     socket.on('directory:request-path', ({ roomName, targetUserId, path }) => {
         const room = rooms.get(roomName);
         if (room && room.directories[targetUserId]) {
@@ -1160,6 +1226,8 @@ async function startServer() {
         }
     });
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     socket.on('editor:save', ({ roomName, documentId }) => {
         const room = rooms.get(roomName);
         if (room) {
@@ -1186,6 +1254,7 @@ async function startServer() {
         }
     });
 
+<<<<<<< HEAD
     socket.on('whiteboard:action', ({ action, data }) => {
         const roomName = socketRoomMap.get(socket.id);
         if (roomName) {
@@ -1221,6 +1290,8 @@ async function startServer() {
         }
     });
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     socket.on('task:update', ({ roomName, tasks }) => {
         if (rooms.has(roomName)) {
             rooms.get(roomName).tasks = tasks;
@@ -1302,6 +1373,7 @@ async function startServer() {
         // Construct path
         // parentId is the relative path of the parent folder
         const parentPath = node.parentId || '';
+<<<<<<< HEAD
         const roomDir = path.join(PROJECTS_DIR, roomName);
         const fullPath = path.join(roomDir, parentPath, node.name);
         
@@ -1310,6 +1382,9 @@ async function startServer() {
             console.error("Invalid path detected in editor:create");
             return;
         }
+=======
+        const fullPath = path.join(PROJECTS_DIR, roomName, parentPath, node.name);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         
         try {
             if (node.type === 'directory') {
@@ -1338,6 +1413,7 @@ async function startServer() {
         if (!rooms.has(roomName)) return;
         
         // nodeId is the relative path
+<<<<<<< HEAD
         const roomDir = path.join(PROJECTS_DIR, roomName);
         const fullPath = path.join(roomDir, nodeId);
         
@@ -1346,6 +1422,9 @@ async function startServer() {
             console.error("Invalid path detected in editor:delete");
             return;
         }
+=======
+        const fullPath = path.join(PROJECTS_DIR, roomName, nodeId);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         
         try {
             if (fs.existsSync(fullPath)) {
@@ -1365,6 +1444,7 @@ async function startServer() {
     socket.on('editor:rename', ({ roomName, nodeId, newName }: { roomName: string; nodeId: string; newName: string }) => {
         if (!rooms.has(roomName)) return;
         
+<<<<<<< HEAD
         const roomDir = path.join(PROJECTS_DIR, roomName);
         const oldPath = path.join(roomDir, nodeId);
         const dir = path.dirname(oldPath);
@@ -1376,6 +1456,12 @@ async function startServer() {
             return;
         }
         
+=======
+        const oldPath = path.join(PROJECTS_DIR, roomName, nodeId);
+        const dir = path.dirname(oldPath);
+        const newPath = path.join(dir, newName);
+        
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         try {
             if (fs.existsSync(oldPath)) {
                 fs.renameSync(oldPath, newPath);
@@ -1419,7 +1505,11 @@ async function startServer() {
     return Array.from(new Set(addresses));
   };
 
+<<<<<<< HEAD
   const PORT = parseInt(process.env.PORT || '4000', 10);
+=======
+  const PORT = parseInt(process.env.PORT || '3000', 10);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   server.listen(PORT, '0.0.0.0', () => {
     const ips = getLocalIpAddresses();
     console.log(`\n✅ SYNAPSE SERVER RUNNING`);

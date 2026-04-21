@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { View, Task, Snippet, SharedFile, User, DirectoryState, Section, EditorNode, EditorFile, EditorFolder } from '@/types';
 import { Kanban } from '@/components/Kanban';
+<<<<<<< HEAD
 
+=======
+import { BoilerplateGenerator } from '@/components/BoilerplateGenerator';
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { SnippetVault } from '@/components/SnippetVault';
 
 import { DirectoryBrowser } from '@/components/DirectoryBrowser';
@@ -14,7 +18,10 @@ import { Users } from 'lucide-react';
 import { Settings } from '@/components/Settings';
 import { Login } from '@/components/Login';
 import { SpotlightNavbar } from '@/components/SpotlightNavbar';
+<<<<<<< HEAD
 import { useIsMobile } from '@/hooks/useIsMobile';
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { motion, AnimatePresence } from 'framer-motion';
 import CollaborativeCodeEditor from '@/components/CollaborativeCodeEditor';
 import { ProjectSidebar } from '@/components/ProjectSidebar';
@@ -23,12 +30,18 @@ import { SubtleBackground } from '@/components/SubtleBackground';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ChatBox from '@/components/ChatBox';
+<<<<<<< HEAD
 import { Whiteboard } from '@/components/Whiteboard';
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { useGemini } from '@/hooks/useGemini';
 
 
 const App: React.FC = () => {
+<<<<<<< HEAD
   const isMobile = useIsMobile();
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   // --- Auth & Room State ---
   const [roomName, setRoomName] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -43,9 +56,13 @@ const App: React.FC = () => {
   
   // --- App View State ---
   const [view, setView] = useState<View>('kanban');
+<<<<<<< HEAD
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(true);
+=======
+  const [isConnected, setIsConnected] = useState(false);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   const socketRef = useRef<Socket | null>(null);
   
   const [serverUrl, setServerUrl] = useState<string>(() => {
@@ -145,17 +162,23 @@ const App: React.FC = () => {
     socket.on('connect', () => {
       console.log('Socket connected');
       setIsConnected(true);
+<<<<<<< HEAD
       setIsConnecting(false);
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     });
 
     socket.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
       setIsConnected(false);
+<<<<<<< HEAD
       setIsConnecting(false);
     });
 
     socket.on('connect_error', () => {
       setIsConnecting(false);
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     });
 
     // --- Room Auth Events ---
@@ -422,6 +445,7 @@ const App: React.FC = () => {
 
 
 
+<<<<<<< HEAD
   const content = !roomName ? (
       <Login 
           onJoin={handleJoinRoom} 
@@ -430,6 +454,20 @@ const App: React.FC = () => {
           toggleTheme={toggleTheme}
       />
   ) : (
+=======
+  if (!roomName) {
+      return (
+          <Login 
+              onJoin={handleJoinRoom} 
+              error={authError} 
+              themeMode={themeMode}
+              toggleTheme={toggleTheme}
+          />
+      );
+  }
+
+  return (
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     <div className="min-h-screen text-hack-text font-sans selection:bg-hack-primary selection:text-black flex flex-col animate-fade-in overflow-hidden relative pb-24 transition-colors duration-500 rounded-2xl shadow-lg">
       <SubtleBackground mode={themeMode} />
       
@@ -485,6 +523,7 @@ const App: React.FC = () => {
 
                     <div className="flex-1 backdrop-blur-sm border border-hack-border p-1 h-full overflow-hidden rounded-xl relative">
                         <AnimatePresence mode="wait">
+<<<<<<< HEAD
                             {view === 'whiteboard' && (
                                 <motion.div
                                     key="whiteboard"
@@ -497,6 +536,8 @@ const App: React.FC = () => {
                                     <Whiteboard socket={socketRef.current} roomName={roomName} />
                                 </motion.div>
                             )}
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                             {view === 'kanban' && (
                                 <motion.div
                                     key="kanban"
@@ -538,12 +579,18 @@ const App: React.FC = () => {
                                         sections={fileSections}
                                         onSectionsChange={handleUpdateFileSections}
                                         onFileDelete={(fileName) => {
+<<<<<<< HEAD
                                             fetch(`/upload/${roomName}/${fileName}`, { 
                                                 method: 'DELETE',
                                                 headers: {
                                                     'Authorization': accessKey || ''
                                                 }
                                             });
+=======
+                                            if (confirm(`Are you sure you want to delete ${fileName}?`)) {
+                                                fetch(`/upload/${roomName}/${fileName}`, { method: 'DELETE' });
+                                            }
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                                         }}
                                         serverUrl={serverUrl}
                                         roomName={roomName}
@@ -591,6 +638,7 @@ const App: React.FC = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
                                     transition={{ duration: 0.3 }}
+<<<<<<< HEAD
                                     className="h-full w-full flex overflow-hidden relative"
                                 >
                                     {(!isMobile || showMobileSidebar) && (
@@ -639,6 +687,36 @@ const App: React.FC = () => {
                                             </div>
                                         )}
                                     </div>
+=======
+                                    className="h-full w-full flex overflow-hidden"
+                                >
+                                    <ProjectSidebar
+                                        files={editorFiles}
+                                        onSelectFile={setSelectedFile}
+                                        onCreateFile={handleCreateFile}
+                                        onCreateFolder={handleCreateFolder}
+                                        onDelete={handleDeleteNode}
+                                        onRename={handleRenameNode}
+                                        onDownloadZip={handleDownloadZip}
+                                        selectedFileId={selectedFile?.id || null}
+                                    />
+                                    {selectedFile ? (
+                                        <CollaborativeCodeEditor 
+                                            roomName={roomName} 
+                                            documentId={selectedFile.id}
+                                            initialContent={selectedFile.content}
+                                            language={selectedFile.language}
+                                            socket={socketRef.current!}
+                                        />
+                                    ) : (
+                                        <div className="flex-1 flex items-center justify-center text-gray-500 bg-[#1e1e1e]">
+                                            <div className="text-center">
+                                                <p className="mb-2">Select a file to start editing</p>
+                                                <p className="text-xs opacity-50">Changes are saved automatically</p>
+                                            </div>
+                                        </div>
+                                    )}
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                                 </motion.div>
                             )}
                             {view === 'admin' && (
@@ -693,6 +771,7 @@ const App: React.FC = () => {
                                     />
                                 </motion.div>
                             )}
+<<<<<<< HEAD
                             {view === 'chat' && (
                                 <motion.div
                                     key="chat"
@@ -754,6 +833,8 @@ const App: React.FC = () => {
                                     </div>
                                 </motion.div>
                             )}
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                         </AnimatePresence>
                     </div>
                 </div>
@@ -802,6 +883,7 @@ const App: React.FC = () => {
             </div>
         </main>
       </div>
+<<<<<<< HEAD
       <SpotlightNavbar currentView={view} onNavigate={setView} isMobile={isMobile} />
     </div>
   );
@@ -838,6 +920,11 @@ const App: React.FC = () => {
         )}
     </>
   );
+=======
+      <SpotlightNavbar currentView={view} onNavigate={setView} />
+    </div>
+  );
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 };
 
 export default App;

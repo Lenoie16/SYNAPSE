@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+<<<<<<< HEAD
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
@@ -12,6 +13,12 @@ export default defineConfig({
       ]
     })
   ],
+=======
+
+export default defineConfig({
+  root: '.',
+  plugins: [react()],
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   resolve: {
     alias: {
       '@': '/src',
@@ -25,6 +32,7 @@ export default defineConfig({
     },
     proxy: {
       '/socket.io': {
+<<<<<<< HEAD
         target: 'http://localhost:4000',
         ws: true
       },
@@ -38,6 +46,21 @@ export default defineConfig({
       },
       '/api': {
         target: 'http://localhost:4000',
+=======
+        target: 'http://localhost:3000',
+        ws: true
+      },
+      '/upload': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      },
+      '/uploads': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      },
+      '/api': {
+        target: 'http://localhost:3000',
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         changeOrigin: true
       }
     }

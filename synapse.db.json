@@ -1,0 +1,52 @@
+{
+  "rooms": [
+    [
+      "LJ2",
+      {
+        "name": "LJ2",
+        "password": "12345",
+        "host": "luci",
+        "users": [],
+        "tasks": [],
+        "snippets": [],
+        "sections": [],
+        "fileSections": [],
+        "directories": {},
+        "editorFiles": [],
+        "chatHistory": [],
+        "startTime": 1772815988060,
+        "endTime": 1772902388060,
+        "encryptionEnabled": true
+      }
+    ],
+    [
+      "MY PG",
+      {
+        "name": "MY PG",
+        "password": "123456",
+        "host": "overlord2.0",
+        "users": [
+          {
+            "id": "DNqw0S9opdrjjGg1AAAB",
+            "name": "overlord2.0",
+            "isHost": true
+          }
+        ],
+        "tasks": [],
+        "snippets": [],
+        "sections": [],
+        "fileSections": [],
+        "directories": {},
+        "editorFiles": [],
+        "chatHistory": [],
+        "startTime": 1772817922255,
+        "endTime": 1772904322255,
+        "encryptionEnabled": true
+      }
+    ]
+  ],
+  "admin": {
+    "username": "admin1",
+    "passwordHash": "$2b$10$Fc6WveNBtosL3kaeq5tUEetXoVwu7UPXWYSMHd6uUC44F/ys7CLlG"
+  }
+}

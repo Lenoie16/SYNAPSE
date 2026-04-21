@@ -12,6 +12,7 @@ import { encryptFile, decryptFile } from '@/utils/crypto';
 type SortOption = 'newest' | 'oldest' | 'name' | 'size';
 type FileTypeFilter = 'All' | 'TypeScript' | 'JavaScript' | 'Python' | 'JSON' | 'PDF';
 
+<<<<<<< HEAD
 export interface UploadControlRef {
     uploadFiles: (files: File[]) => void;
 }
@@ -30,10 +31,19 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
     const [tasks, setTasks] = useState<UploadTask[]>([]);
     const [showPopup, setShowPopup] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+=======
+const UploadControl: React.FC<{ serverUrl: string, roomName: string, roomPassword?: string, encryptionEnabled?: boolean }> = ({ serverUrl, roomName, roomPassword, encryptionEnabled }) => {
+    const [isUploading, setIsUploading] = useState(false);
+    const [encryptionStatus, setEncryptionStatus] = useState<'idle' | 'encrypting'>('idle');
+    const [uploadProgress, setUploadProgress] = useState<{ loaded: number; total: number } | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const lastProgressUpdate = useRef<number>(0);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
     const cleanServerUrl = serverUrl.replace(/\/$/, '');
     const bytesToMB = (bytes: number) => (bytes / (1024 * 1024)).toFixed(2);
 
+<<<<<<< HEAD
     React.useImperativeHandle(ref, () => ({
         uploadFiles: (files: File[]) => {
             handleFiles(files);
@@ -80,26 +90,73 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
 
     const startUpload = (taskId: string, file: File) => {
         setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'uploading' } : t));
+=======
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        if (roomPassword && encryptionEnabled) {
+            try {
+                setEncryptionStatus('encrypting');
+                // Small delay to allow UI to update
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                const buffer = await file.arrayBuffer();
+                const encryptedBuffer = await encryptFile(buffer, roomPassword);
+                const encryptedFile = new File([encryptedBuffer], file.name, { type: file.type });
+                
+                setEncryptionStatus('idle');
+                startUpload(encryptedFile);
+            } catch (error) {
+                console.error("Encryption failed:", error);
+                alert("Failed to encrypt file before upload.");
+                setEncryptionStatus('idle');
+            }
+        } else {
+            startUpload(file);
+        }
+    };
+
+    const startUpload = (file: File) => {
+        setIsUploading(true);
+        setUploadProgress({ loaded: 0, total: file.size });
+        lastProgressUpdate.current = Date.now();
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         
         const formData = new FormData();
         formData.append('roomName', roomName); 
         formData.append('file', file);
+<<<<<<< HEAD
         formData.append('password', roomPassword || '');
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
         const xhr = new XMLHttpRequest();
         
         xhr.upload.addEventListener("progress", (event) => {
           if (event.lengthComputable) {
+<<<<<<< HEAD
               setTasks(prev => prev.map(t => t.id === taskId ? { 
                   ...t, 
                   loaded: event.loaded, 
                   total: event.total,
                   progress: (event.loaded / event.total) * 100
               } : t));
+=======
+            const now = Date.now();
+            if (now - lastProgressUpdate.current >= 200 || event.loaded === event.total) {
+                setUploadProgress({
+                    loaded: event.loaded,
+                    total: event.total
+                });
+                lastProgressUpdate.current = now;
+            }
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
           }
         });
 
         xhr.addEventListener("load", () => {
+<<<<<<< HEAD
           if (xhr.status >= 200 && xhr.status < 300) {
               setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'done', progress: 100 } : t));
               // Remove done tasks after a delay
@@ -112,21 +169,46 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
               }, 3000);
           } else {
               setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'error', error: `Server error ${xhr.status}` } : t));
+=======
+          setTimeout(() => {
+              setIsUploading(false);
+              setUploadProgress(null);
+          }, 500);
+          
+          if (xhr.status >= 200 && xhr.status < 300) {
+             if (fileInputRef.current) fileInputRef.current.value = '';
+          } else {
+             console.error('Upload failed:', xhr.responseText);
+             alert(`Upload failed: Server responded with ${xhr.status}`);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
           }
         });
 
         xhr.addEventListener("error", () => {
+<<<<<<< HEAD
             setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'error', error: 'Network error' } : t));
         });
 
         xhr.addEventListener("abort", () => {
             setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'error', error: 'Aborted' } : t));
+=======
+          setIsUploading(false);
+          setUploadProgress(null);
+          console.error('Upload error');
+          alert("Upload failed due to a network error.");
+        });
+
+        xhr.addEventListener("abort", () => {
+          setIsUploading(false);
+          setUploadProgress(null);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
         });
 
         xhr.open("POST", `${cleanServerUrl}/upload`);
         xhr.send(formData);
     };
 
+<<<<<<< HEAD
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
@@ -137,6 +219,10 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
     const activeTasks = tasks.filter(t => t.status !== 'done' && t.status !== 'error');
     const isUploading = activeTasks.length > 0;
     const totalProgress = tasks.length > 0 ? tasks.reduce((acc, t) => acc + t.progress, 0) / tasks.length : 0;
+=======
+    // Expose drop handler to parent if needed, or handle here. 
+    // For this design, the drop zone is separate. We'll reuse the input ref.
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
     return (
         <div className="relative">
@@ -146,6 +232,7 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
                 onChange={handleUpload}
                 className="hidden"
                 id="file-upload"
+<<<<<<< HEAD
                 multiple
             />
             <label 
@@ -160,6 +247,27 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
                         />
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin relative z-10" />
                         <span className="relative z-10 text-xs font-mono animate-pulse">Uploading {activeTasks.length}...</span>
+=======
+            />
+            <label 
+                htmlFor={isUploading || encryptionStatus === 'encrypting' ? undefined : "file-upload"}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold cursor-pointer transition-all shadow-[0_0_20px_rgba(236,72,153,0.3)] hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] whitespace-nowrap relative overflow-hidden ${isUploading || encryptionStatus === 'encrypting' ? 'bg-gray-800 text-white cursor-default w-48 justify-center' : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:brightness-110'}`}
+            >
+                {encryptionStatus === 'encrypting' ? (
+                    <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="text-xs font-mono animate-pulse">Encrypting...</span>
+                    </>
+                ) : isUploading && uploadProgress ? (
+                    <>
+                       <div 
+                            className="absolute left-0 top-0 bottom-0 bg-white/20 transition-all duration-200" 
+                            style={{ width: `${(uploadProgress.loaded / uploadProgress.total) * 100}%` }}
+                       />
+                       <span className="relative z-10 text-xs font-mono animate-pulse">
+                           {bytesToMB(uploadProgress.loaded)} / {bytesToMB(uploadProgress.total)} MB
+                       </span>
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                     </>
                 ) : (
                     <>
@@ -168,6 +276,7 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
                     </>
                 )}
             </label>
+<<<<<<< HEAD
 
             {/* Status Popup */}
             {showPopup && tasks.length > 0 && (
@@ -207,6 +316,11 @@ const UploadControl = React.forwardRef<UploadControlRef, { serverUrl: string, ro
         </div>
     );
 });
+=======
+        </div>
+    );
+};
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
 // Helper to get file icon and type label
 const getFileInfo = (fileName: string) => {
@@ -248,8 +362,11 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
   const [isCategorizing, setIsCategorizing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+<<<<<<< HEAD
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
   const uploadControlRef = useRef<UploadControlRef>(null);
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   
   // Section State
   const [selectedSectionId, setSelectedSectionId] = useState<string | null | 'all'>('all');
@@ -258,6 +375,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
 
   const handleDownload = async (fileName: string) => {
       setDownloadingFile(fileName);
+<<<<<<< HEAD
       setDownloadProgress(0);
       try {
           const response = await fetch(`${serverUrl}/uploads/${roomName}/${fileName}?password=${encodeURIComponent(roomPassword || '')}`);
@@ -290,6 +408,20 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
               try {
                   const decryptedBuffer = await decryptFile(buffer.buffer, roomPassword);
                   downloadBlob = new Blob([decryptedBuffer], { type: response.headers.get('Content-Type') || 'application/octet-stream' });
+=======
+      try {
+          const response = await fetch(`${serverUrl}/uploads/${roomName}/${fileName}`);
+          if (!response.ok) throw new Error('Download failed');
+          
+          const blob = await response.blob();
+          
+          let downloadBlob = blob;
+          if (roomPassword) {
+              try {
+                  const buffer = await blob.arrayBuffer();
+                  const decryptedBuffer = await decryptFile(buffer, roomPassword);
+                  downloadBlob = new Blob([decryptedBuffer], { type: blob.type });
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
               } catch (e) {
                   console.error("Decryption failed, downloading raw file", e);
                   // Fallback to raw file if decryption fails (e.g. file wasn't encrypted)
@@ -309,6 +441,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
           alert('Failed to download file');
       } finally {
           setDownloadingFile(null);
+<<<<<<< HEAD
           setDownloadProgress(0);
       }
   };
@@ -378,22 +511,49 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
     if (activeFilter !== 'All') {
         result = result.filter(g => {
             const info = getFileInfo(g.mainFile.name);
+=======
+      }
+  };
+
+  const processedFiles = useMemo(() => {
+    let result = [...files];
+
+    if (searchQuery) {
+        const lowerQ = searchQuery.toLowerCase();
+        result = result.filter(f => f.name.toLowerCase().includes(lowerQ));
+    }
+
+    if (activeFilter !== 'All') {
+        result = result.filter(f => {
+            const info = getFileInfo(f.name);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
             return info.label === activeFilter || (activeFilter === 'TypeScript' && info.label === 'React TS') || (activeFilter === 'JavaScript' && info.label === 'React JS');
         });
     }
 
     result.sort((a, b) => {
         switch(sortOrder) {
+<<<<<<< HEAD
             case 'newest': return b.mainFile.uploadedAt - a.mainFile.uploadedAt;
             case 'oldest': return a.mainFile.uploadedAt - b.mainFile.uploadedAt;
             case 'name': return a.mainFile.name.localeCompare(b.mainFile.name);
             case 'size': return b.mainFile.size - a.mainFile.size;
+=======
+            case 'newest': return b.uploadedAt - a.uploadedAt;
+            case 'oldest': return a.uploadedAt - b.uploadedAt;
+            case 'name': return a.name.localeCompare(b.name);
+            case 'size': return b.size - a.size;
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
             default: return 0;
         }
     });
 
     return result;
+<<<<<<< HEAD
   }, [groupedFiles, searchQuery, sortOrder, activeFilter]);
+=======
+  }, [files, searchQuery, sortOrder, activeFilter]);
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
   // Filter by Section
   const displayedFiles = useMemo(() => {
@@ -402,13 +562,21 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
       if (selectedSectionId === null) {
           // Uncategorized: files not in any section
           const categorizedFileNames = new Set(sections.flatMap(s => s.itemIds || []));
+<<<<<<< HEAD
           return processedFiles.filter(g => !categorizedFileNames.has(g.mainFile.name));
+=======
+          return processedFiles.filter(f => !categorizedFileNames.has(f.name));
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       }
 
       const section = sections.find(s => s.id === selectedSectionId);
       if (!section || !section.itemIds) return [];
       
+<<<<<<< HEAD
       return processedFiles.filter(g => section.itemIds?.includes(g.mainFile.name));
+=======
+      return processedFiles.filter(f => section.itemIds?.includes(f.name));
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   }, [processedFiles, selectedSectionId, sections]);
 
   const handleAiCategorize = async () => {
@@ -428,6 +596,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
 
       const filesWithContent = await Promise.all(uncategorizedFiles.map(async (file) => {
         try {
+<<<<<<< HEAD
             const response = await fetch(`${serverUrl}/uploads/${roomName}/${file.name}?password=${encodeURIComponent(roomPassword || '')}`);
             let text = '';
             if (roomPassword && encryptionEnabled) {
@@ -446,6 +615,10 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
             } else {
                 text = await response.text();
             }
+=======
+            const response = await fetch(`${serverUrl}/uploads/${roomName}/${file.name}`);
+            const text = await response.text();
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
             // Truncate content to avoid token limits (approx 2k tokens)
             const content = text.slice(0, 8000);
             return { ...file, content };
@@ -509,8 +682,16 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
       e.preventDefault();
       e.stopPropagation();
       setDragActive(false);
+<<<<<<< HEAD
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
           uploadControlRef.current?.uploadFiles(Array.from(e.dataTransfer.files));
+=======
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+          if (fileInput) {
+              alert("Please use the Upload Data button for now. Drag and drop logic needs hoisting.");
+          }
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       }
   };
 
@@ -598,6 +779,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                     <Icons.Zap className="w-4 h-4" />
                     {isCategorizing ? 'Analyzing...' : 'AI Categorize'}
                 </button>
+<<<<<<< HEAD
                 <UploadControl ref={uploadControlRef} serverUrl={serverUrl} roomName={roomName} roomPassword={roomPassword} encryptionEnabled={encryptionEnabled} />
             </div>
         </div>
@@ -611,6 +793,21 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                     <button
                         onClick={() => setSelectedSectionId('all')}
                         className={`w-full shrink-0 text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between gap-2 group ${
+=======
+                <UploadControl serverUrl={serverUrl} roomName={roomName} roomPassword={roomPassword} encryptionEnabled={encryptionEnabled} />
+            </div>
+        </div>
+
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-6 overflow-hidden">
+            {/* Sidebar - Sections */}
+            <div className="md:col-span-1 bg-[rgb(var(--hack-surface))]/50 border border-[rgb(var(--hack-border))] rounded-2xl p-4 flex flex-col h-full overflow-hidden">
+                <h3 className="text-xs font-bold text-[rgb(var(--hack-text))]/50 uppercase tracking-widest mb-4 px-2">Data Sections</h3>
+                
+                <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                    <button
+                        onClick={() => setSelectedSectionId('all')}
+                        className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between group ${
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                             selectedSectionId === 'all' 
                             ? 'bg-[rgb(var(--hack-primary))]/10 text-[rgb(var(--hack-primary))] border border-[rgb(var(--hack-primary))]/30' 
                             : 'text-[rgb(var(--hack-text))]/60 hover:bg-[rgb(var(--hack-text))]/5 hover:text-[rgb(var(--hack-text))]'
@@ -626,7 +823,11 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                         onClick={() => setSelectedSectionId(null)}
                         onDrop={(e) => handleSectionDrop(e, null)}
                         onDragOver={handleSectionDragOver}
+<<<<<<< HEAD
                         className={`w-full shrink-0 text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between gap-2 group ${
+=======
+                        className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between group ${
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                             selectedSectionId === null 
                             ? 'bg-[rgb(var(--hack-primary))]/10 text-[rgb(var(--hack-primary))] border border-[rgb(var(--hack-primary))]/30' 
                             : 'text-[rgb(var(--hack-text))]/60 hover:bg-[rgb(var(--hack-text))]/5 hover:text-[rgb(var(--hack-text))]'
@@ -640,14 +841,22 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                         </span>
                     </button>
 
+<<<<<<< HEAD
                     <div className="hidden md:block h-px bg-[rgb(var(--hack-border))] my-2 mx-2 shrink-0"></div>
+=======
+                    <div className="h-px bg-[rgb(var(--hack-border))] my-2 mx-2"></div>
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
                     {sections.map(section => (
                         <div 
                             key={section.id}
                             onDrop={(e) => handleSectionDrop(e, section.id)}
                             onDragOver={handleSectionDragOver}
+<<<<<<< HEAD
                             className={`w-full shrink-0 group relative flex items-center rounded-xl transition-all ${
+=======
+                            className={`group relative flex items-center rounded-xl transition-all ${
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                                 selectedSectionId === section.id 
                                 ? 'bg-[rgb(var(--hack-primary))]/10 border border-[rgb(var(--hack-primary))]/30' 
                                 : 'hover:bg-[rgb(var(--hack-text))]/5'
@@ -673,7 +882,11 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                     ))}
                 </div>
 
+<<<<<<< HEAD
                 <div className="mt-2 md:mt-4 pt-2 md:pt-4 border-t border-[rgb(var(--hack-border))] shrink-0">
+=======
+                <div className="mt-4 pt-4 border-t border-[rgb(var(--hack-border))]">
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                     {isAddingSection ? (
                         <div className="bg-[rgb(var(--hack-surface))] p-2 rounded-xl border border-[rgb(var(--hack-border))]">
                             <input
@@ -767,6 +980,7 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                 {/* File List */}
                 <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
                     <AnimatePresence mode="popLayout">
+<<<<<<< HEAD
                         {displayedFiles.map((group) => {
                             const file = group.mainFile;
                             const info = getFileInfo(file.name);
@@ -873,6 +1087,62 @@ export const FileBrowser: React.FC<FileBrowserProps> = ({ files = [], sections =
                                         </div>
                                     )}
                                 </div>
+=======
+                        {displayedFiles.map((file) => {
+                            const info = getFileInfo(file.name);
+                            const Icon = info.icon;
+                            return (
+                                <motion.div
+                                    key={file.name}
+                                    layout
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    draggable
+                                    onDragStart={(e) => handleFileDragStart(e as any, file.name)}
+                                    className="group flex items-center gap-4 p-3 bg-[rgb(var(--hack-surface))] border border-[rgb(var(--hack-border))] rounded-xl hover:border-[rgb(var(--hack-primary))]/30 transition-all hover:shadow-[0_0_20px_rgba(0,0,0,0.2)] cursor-grab active:cursor-grabbing"
+                                >
+                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${info.bg} border ${info.border}`}>
+                                        <Icon className={`w-5 h-5 ${info.color}`} />
+                                    </div>
+                                    
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-bold text-[rgb(var(--hack-text))] truncate text-sm mb-0.5">{file.name}</h4>
+                                        <div className="flex items-center gap-3 text-[10px] text-[rgb(var(--hack-text))]/50 font-mono">
+                                            <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                                            <span className={`px-1.5 py-0.5 rounded ${info.bg} ${info.color} border ${info.border} uppercase`}>
+                                                {info.label}
+                                            </span>
+                                            <span className="hidden sm:inline">{formatTimeAgo(file.uploadedAt)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => handleDownload(file.name)}
+                                            disabled={downloadingFile === file.name}
+                                            className="p-2 rounded-lg bg-[rgb(var(--hack-text))]/5 hover:bg-[rgb(var(--hack-text))]/10 text-[rgb(var(--hack-text))]/40 hover:text-[rgb(var(--hack-text))] transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                                            title="Download"
+                                        >
+                                            {downloadingFile === file.name ? (
+                                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <Download className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                        
+                                        {/* Move to Section Dropdown could go here, but Drag & Drop is implemented */}
+                                        
+                                        <button 
+                                            onClick={() => onFileDelete(file.name)} 
+                                            className="p-2 rounded-lg bg-[rgb(var(--hack-danger))]/10 hover:bg-[rgb(var(--hack-danger))]/20 text-[rgb(var(--hack-danger))] hover:text-[rgb(var(--hack-danger))]/80 transition-colors opacity-0 group-hover:opacity-100"
+                                            title="Delete"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </motion.div>
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                             );
                         })}
                     </AnimatePresence>

@@ -365,4 +365,8 @@ Requirements:
 
 * Chrome or Edge browser
 * Desktop device (not mobile)
+<<<<<<< HEAD
 * Folder permissions granted
+=======
+* Folder permissions granted
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d

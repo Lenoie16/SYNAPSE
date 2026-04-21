@@ -1,7 +1,11 @@
 
 import React, { useRef, useState } from 'react';
 import { View } from '@/types';
+<<<<<<< HEAD
 import { Kanban, Code, FileText, Folder, Zap, Settings, Shield, MessageSquare, Activity, PenTool, Archive } from 'lucide-react';
+=======
+import { Kanban, Code, FileText, Folder, Zap, Settings, Shield } from 'lucide-react';
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { motion } from 'motion/react';
 
 interface NavItem {
@@ -13,10 +17,16 @@ interface NavItem {
 interface SpotlightNavbarProps {
   currentView: View;
   onNavigate: (view: View) => void;
+<<<<<<< HEAD
   isMobile?: boolean;
 }
 
 export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, onNavigate, isMobile }) => {
+=======
+}
+
+export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, onNavigate }) => {
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   const divRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
@@ -39,6 +49,7 @@ export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, o
     setOpacity(0);
   };
 
+<<<<<<< HEAD
   const baseNavItems: NavItem[] = [
     { id: 'whiteboard', icon: PenTool, label: 'Draw' },
     { id: 'kanban', icon: Kanban, label: 'Board' },
@@ -46,11 +57,20 @@ export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, o
     { id: 'files', icon: FileText, label: 'Data' },
     { id: 'directory', icon: Folder, label: 'Dirs' },
     
+=======
+  const navItems: NavItem[] = [
+    { id: 'kanban', icon: Kanban, label: 'Board' },
+    { id: 'snippets', icon: Code, label: 'Vault' },
+    { id: 'files', icon: FileText, label: 'Data' },
+    { id: 'directory', icon: Folder, label: 'Dirs' },
+    { id: 'boilerplate', icon: Zap, label: 'Stack' },
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     { id: 'code-editor', icon: Code, label: 'Editor' },
     { id: 'settings', icon: Settings, label: 'Sys' },
     { id: 'admin', icon: Shield, label: 'Admin' },
   ];
 
+<<<<<<< HEAD
   const mobileNavItems: NavItem[] = [
     { id: 'chat', icon: MessageSquare, label: 'Chat' },
     { id: 'diagnostics', icon: Activity, label: 'Stats' },
@@ -60,6 +80,8 @@ export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, o
     ? [...baseNavItems.filter(item => item.id !== 'settings' && item.id !== 'admin'), ...mobileNavItems] 
     : baseNavItems;
 
+=======
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4">
       <div
@@ -67,11 +89,19 @@ export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, o
         onMouseMove={handleMouseMove}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+<<<<<<< HEAD
         className="relative flex items-center justify-start md:justify-around gap-1 rounded-2xl border border-hack-border bg-hack-surface/90 p-2 shadow-2xl backdrop-blur-xl transition-colors duration-500 overflow-x-auto hide-scrollbar"
       >
         {/* Spotlight Effect */}
         <div
           className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 hidden md:block"
+=======
+        className="relative flex items-center justify-around gap-1 rounded-2xl border border-hack-border bg-hack-surface/90 p-2 shadow-2xl backdrop-blur-xl transition-colors duration-500"
+      >
+        {/* Spotlight Effect */}
+        <div
+          className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300"
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
           style={{
             opacity,
             background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgb(var(--hack-primary) / 0.15), transparent 40%)`,
@@ -80,7 +110,11 @@ export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, o
         
         {/* Spotlight Border Glow */}
         <div 
+<<<<<<< HEAD
             className="pointer-events-none absolute inset-0 rounded-2xl transition duration-300 hidden md:block"
+=======
+            className="pointer-events-none absolute inset-0 rounded-2xl transition duration-300"
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
             style={{
                 opacity,
                 background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, rgb(var(--hack-primary) / 0.4), transparent 40%)`,
@@ -99,7 +133,11 @@ export const SpotlightNavbar: React.FC<SpotlightNavbarProps> = ({ currentView, o
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
+<<<<<<< HEAD
               className={`relative z-10 flex flex-col items-center justify-center rounded-xl px-4 py-3 transition-all duration-300 group flex-shrink-0`}
+=======
+              className={`relative z-10 flex flex-col items-center justify-center rounded-xl px-4 py-3 transition-all duration-300 group`}
+>>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
             >
               {/* Active Background Pill */}
               {isActive && (
