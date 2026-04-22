@@ -23,8 +23,8 @@ export const CyberTopbar: React.FC<CyberTopbarProps> = ({ currentUser, roomName 
 
   return (
     <div className="h-[52px] bg-[#0d1426]/95 border-b border-white/5 backdrop-blur-xl flex items-center px-6 relative z-[100] flex-shrink-0">
-      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#9b4dff]/50 via-[#ff2d78]/50 to-transparent"></div>
-      
+      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#9b4dff]/50 to-transparent"></div>
+
       <div className="font-orbitron font-black text-lg tracking-[4px] bg-gradient-to-r from-[#bf5fff] to-[#ff2d78] bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(191,95,255,0.5)] mr-8">
         SYNAPSE
       </div>

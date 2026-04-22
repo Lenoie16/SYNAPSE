@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EditorNode, EditorFile, EditorFolder } from '@/types';
-import { Folder, File, FolderPlus, FilePlus, ChevronRight, ChevronDown, Trash2, Edit2, Download, Cloud } from 'lucide-react';
+import { File, FolderPlus, FilePlus, ChevronRight, ChevronDown, Trash2, Edit2, Download, Cloud } from 'lucide-react';
 
 interface ProjectSidebarProps {
   files: EditorNode[];
@@ -11,10 +11,7 @@ interface ProjectSidebarProps {
   onRename: (nodeId: string, newName: string) => void;
   onDownloadZip: () => void;
   selectedFileId: string | null;
-<<<<<<< HEAD
   onCloseMobile?: () => void;
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 }
 
 const FileTreeNode: React.FC<{
@@ -40,7 +37,7 @@ const FileTreeNode: React.FC<{
 
   return (
     <div className="select-none">
-      <div 
+      <div
         className={`flex items-center group px-2 py-1 hover:bg-white/5 cursor-pointer ${selectedFileId === node.id ? 'bg-white/10 text-blue-400' : 'text-gray-400'}`}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
         onClick={() => {
@@ -58,7 +55,7 @@ const FileTreeNode: React.FC<{
             <File size={14} />
           )}
         </span>
-        
+
         {isEditing ? (
           <input
             type="text"
@@ -75,42 +72,39 @@ const FileTreeNode: React.FC<{
         )}
 
         <div className="hidden group-hover:flex items-center gap-1 ml-2">
-            {node.type === 'directory' && (
-                <>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); const name = prompt("File name:"); if(name) onCreateFile(node.id, name); }}
-                        className="p-1 hover:text-white"
-                        title="New File"
-                    >
-                        <FilePlus size={12} />
-                    </button>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); const name = prompt("Folder name:"); if(name) onCreateFolder(node.id, name); }}
-                        className="p-1 hover:text-white"
-                        title="New Folder"
-                    >
-                        <FolderPlus size={12} />
-                    </button>
-                </>
-            )}
-            <button 
-                onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+          {node.type === 'directory' && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); const name = prompt("File name:"); if (name) onCreateFile(node.id, name); }}
                 className="p-1 hover:text-white"
-                title="Rename"
-            >
-                <Edit2 size={12} />
-            </button>
-            <button 
-<<<<<<< HEAD
-                onClick={(e) => { e.stopPropagation(); onDelete(node.id); }}
-=======
-                onClick={(e) => { e.stopPropagation(); if(confirm('Delete?')) onDelete(node.id); }}
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
-                className="p-1 hover:text-red-400"
-                title="Delete"
-            >
-                <Trash2 size={12} />
-            </button>
+                title="New File"
+              >
+                <FilePlus size={12} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); const name = prompt("Folder name:"); if (name) onCreateFolder(node.id, name); }}
+                className="p-1 hover:text-white"
+                title="New Folder"
+              >
+                <FolderPlus size={12} />
+              </button>
+            </>
+          )}
+          <button
+            onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+            className="p-1 hover:text-white"
+            title="Rename"
+          >
+            <Edit2 size={12} />
+          </button>
+          {/* FIX: removed duplicate onClick — kept the version with confirm() */}
+          <button
+            onClick={(e) => { e.stopPropagation(); if (confirm('Delete?')) onDelete(node.id); }}
+            className="p-1 hover:text-red-400"
+            title="Delete"
+          >
+            <Trash2 size={12} />
+          </button>
         </div>
       </div>
 
@@ -135,60 +129,51 @@ const FileTreeNode: React.FC<{
   );
 };
 
-export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({ 
-<<<<<<< HEAD
-  files, onSelectFile, onCreateFile, onCreateFolder, onDelete, onRename, onDownloadZip, selectedFileId, onCloseMobile 
+// FIX: removed duplicate/conflicting function signature and return statement
+export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
+  files, onSelectFile, onCreateFile, onCreateFolder, onDelete, onRename, onDownloadZip, selectedFileId, onCloseMobile
 }) => {
   return (
     <div className="h-full flex flex-col bg-[#0D0D0D] border-r border-white/10 w-full md:w-64">
-=======
-  files, onSelectFile, onCreateFile, onCreateFolder, onDelete, onRename, onDownloadZip, selectedFileId 
-}) => {
-  return (
-    <div className="h-full flex flex-col bg-[#0D0D0D] border-r border-white/10 w-64">
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       <div className="p-4 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2 text-white font-medium">
-            <Cloud size={16} className="text-blue-400" />
-            <span>Project</span>
+          <Cloud size={16} className="text-blue-400" />
+          <span>Project</span>
         </div>
         <div className="flex items-center gap-1">
-            <button 
-                onClick={() => { const name = prompt("File name:"); if(name) onCreateFile(null, name); }}
-                className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
-                title="New File"
+          <button
+            onClick={() => { const name = prompt("File name:"); if (name) onCreateFile(null, name); }}
+            className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+            title="New File"
+          >
+            <FilePlus size={16} />
+          </button>
+          <button
+            onClick={() => { const name = prompt("Folder name:"); if (name) onCreateFolder(null, name); }}
+            className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+            title="New Folder"
+          >
+            <FolderPlus size={16} />
+          </button>
+          <button
+            onClick={onDownloadZip}
+            className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+            title="Download ZIP"
+          >
+            <Download size={16} />
+          </button>
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors ml-2"
+              title="Close"
             >
-                <FilePlus size={16} />
+              ✕
             </button>
-            <button 
-                onClick={() => { const name = prompt("Folder name:"); if(name) onCreateFolder(null, name); }}
-                className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
-                title="New Folder"
-            >
-                <FolderPlus size={16} />
-            </button>
-            <button 
-                onClick={onDownloadZip}
-                className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
-                title="Download ZIP"
-            >
-                <Download size={16} />
-            </button>
-<<<<<<< HEAD
-            {onCloseMobile && (
-                <button 
-                    onClick={onCloseMobile}
-                    className="p-1.5 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors ml-2"
-                    title="Close"
-                >
-                    ✕
-                </button>
-            )}
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
+          )}
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto py-2">
         {files.map(node => (
           <FileTreeNode
@@ -204,9 +189,9 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
           />
         ))}
         {files.length === 0 && (
-            <div className="text-center text-gray-500 mt-10 text-sm px-4">
-                No files yet. Create one to get started.
-            </div>
+          <div className="text-center text-gray-500 mt-10 text-sm px-4">
+            No files yet. Create one to get started.
+          </div>
         )}
       </div>
     </div>

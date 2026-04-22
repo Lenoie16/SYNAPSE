@@ -16,9 +16,9 @@ interface SnippetVaultProps {
   encryptionEnabled?: boolean;
 }
 
-const DebugModal: React.FC<{ 
-    code: string; 
-    onClose: () => void; 
+const DebugModal: React.FC<{
+    code: string;
+    onClose: () => void;
     debugCode: (code: string) => Promise<{ error: string; fix: string }>;
     geminiApiKey: string;
 }> = ({ code, onClose, debugCode, geminiApiKey }) => {
@@ -60,8 +60,9 @@ const DebugModal: React.FC<{
         </div>
     );
 };
-const SnippetItem: React.FC<{ 
-    snippet: Snippet; 
+
+const SnippetItem: React.FC<{
+    snippet: Snippet;
     onEdit: (e: React.MouseEvent, s: Snippet) => void;
     onDelete: (e: React.MouseEvent, id: string) => void;
     onDragStart: (e: React.DragEvent<HTMLDivElement>, snippetId: string) => void;
@@ -95,7 +96,6 @@ const SnippetItem: React.FC<{
         const textToCopy = decryptedCode;
 
         if (navigator.clipboard && window.isSecureContext) {
-            // Modern, secure context method
             navigator.clipboard.writeText(textToCopy).then(() => {
                 setIsCopied(true);
                 setTimeout(() => setIsCopied(false), 2000);
@@ -104,7 +104,6 @@ const SnippetItem: React.FC<{
                 fallbackCopy(textToCopy);
             });
         } else {
-            // Fallback for non-secure contexts (e.g., http, IP addresses)
             fallbackCopy(textToCopy);
         }
     };
@@ -112,8 +111,6 @@ const SnippetItem: React.FC<{
     const fallbackCopy = (text: string) => {
         const textArea = document.createElement('textarea');
         textArea.value = text;
-        
-        // Make the textarea invisible
         textArea.style.position = 'fixed';
         textArea.style.top = '0';
         textArea.style.left = '0';
@@ -124,11 +121,9 @@ const SnippetItem: React.FC<{
         textArea.style.outline = 'none';
         textArea.style.boxShadow = 'none';
         textArea.style.background = 'transparent';
-
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-
         try {
             const successful = document.execCommand('copy');
             if (successful) {
@@ -138,15 +133,14 @@ const SnippetItem: React.FC<{
         } catch (err) {
             console.error('Fallback copy failed', err);
         }
-
         document.body.removeChild(textArea);
     };
 
     return (
-        <div 
+        <div
             draggable
             onDragStart={(e) => onDragStart(e, snippet.id)}
-            className={`bg-hack-surface border border-hack-border rounded p-4 hover:border-hack-accent transition-all group flex flex-col cursor-grab`}
+            className="bg-hack-surface border border-hack-border rounded p-4 hover:border-hack-accent transition-all group flex flex-col cursor-grab"
         >
             <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-lg truncate pr-2 flex items-center gap-2" title={snippet.title}>
@@ -154,72 +148,68 @@ const SnippetItem: React.FC<{
                     {snippet.title}
                 </h3>
                 <div className="flex gap-1">
-                    <button 
+                    <button
                         type="button"
-                        onClick={(e) => onEdit(e, snippet)} 
+                        onClick={(e) => onEdit(e, snippet)}
                         className="p-1 text-hack-muted hover:text-hack-accent hover:bg-hack-bg rounded transition-colors"
                         title="Edit Code"
                     >
-                        <Icons.Edit className="w-4 h-4"/>
+                        <Icons.Edit className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                         type="button"
-                        onClick={(e) => onDelete(e, snippet.id)} 
+                        onClick={(e) => onDelete(e, snippet.id)}
                         className="p-1 text-hack-muted hover:text-hack-danger hover:bg-hack-bg rounded transition-colors"
                         title="Delete"
                     >
-                        <Icons.Trash className="w-4 h-4"/>
+                        <Icons.Trash className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                         type="button"
                         onClick={() => onDebug(snippet.code)}
                         className="p-1 text-hack-muted hover:text-blue-500 hover:bg-hack-bg rounded transition-colors"
                         title="Debug Code"
                     >
-                        <Icons.Bug className="w-4 h-4"/>
+                        <Icons.Bug className="w-4 h-4" />
                     </button>
                 </div>
             </div>
-            
+
             <div className="relative flex-1 bg-hack-bg rounded overflow-hidden">
                 {snippet.analysis && snippet.analysis.type !== 'natural_language' && (
-                  <div className="p-2 bg-hack-surface border-b border-hack-border text-xs">
-                    <p className="text-hack-muted italic">{snippet.analysis.summary}</p>
-                    {snippet.analysis.type === 'code' && snippet.analysis.error && <p className="text-red-500 mt-1">Error: {snippet.analysis.error}</p>}
-                  </div>
+                    <div className="p-2 bg-hack-surface border-b border-hack-border text-xs">
+                        <p className="text-hack-muted italic">{snippet.analysis.summary}</p>
+                        {snippet.analysis.type === 'code' && snippet.analysis.error && <p className="text-red-500 mt-1">Error: {snippet.analysis.error}</p>}
+                    </div>
                 )}
                 <div className={`p-3 text-xs font-mono text-gray-400 ${isExpanded ? '' : 'line-clamp-4 max-h-[6em] overflow-hidden'}`}>
                     <pre className="whitespace-pre-wrap break-all font-mono">{decryptedCode}</pre>
                 </div>
-                
+
                 {!isExpanded && (
                     <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-hack-bg to-transparent pointer-events-none"></div>
                 )}
 
-                <button 
+                <button
                     type="button"
                     onClick={handleCopy}
                     className={`absolute top-1 right-1 px-2 py-1 rounded shadow-sm transition-all text-[10px] uppercase font-bold tracking-wider ${
-                        isCopied 
-                        ? 'bg-green-500 text-black opacity-100' 
+                        isCopied
+                        ? 'bg-green-500 text-black opacity-100'
                         : 'bg-hack-surface text-hack-primary opacity-0 group-hover:opacity-100 hover:bg-hack-primary hover:text-black'
                     }`}
                 >
                     {isCopied ? 'Copied!' : 'Copy'}
                 </button>
             </div>
-            <button 
+            <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="w-full text-[10px] flex items-center justify-center gap-1 text-center text-hack-muted mt-2 opacity-70 hover:opacity-100 transition-all uppercase tracking-widest py-1 hover:bg-white/5 rounded"
             >
                 {isExpanded ? (
-                    <>
-                        Collapse <Icons.ChevronDown className="w-3 h-3 transform rotate-180 transition-transform" />
-                    </>
+                    <>Collapse <Icons.ChevronDown className="w-3 h-3 transform rotate-180 transition-transform" /></>
                 ) : (
-                    <>
-                        Expand <Icons.ChevronDown className="w-3 h-3 transition-transform" />
-                    </>
+                    <>Expand <Icons.ChevronDown className="w-3 h-3 transition-transform" /></>
                 )}
             </button>
         </div>
@@ -230,14 +220,12 @@ const SectionNavItem: React.FC<{
     label: string;
     isActive: boolean;
     onClick: () => void;
-    // FIX: Changed DragEvent from HTMLDivElement to HTMLButtonElement to match the element it's attached to.
     onDrop: (e: React.DragEvent<HTMLButtonElement>) => void;
     snippetCount: number;
     isDropTarget?: boolean;
 }> = ({ label, isActive, onClick, onDrop, snippetCount, isDropTarget = true }) => {
     const [isOver, setIsOver] = useState(false);
 
-    // FIX: Changed DragEvent from HTMLDivElement to HTMLButtonElement to match the element it's attached to.
     const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
         if (isDropTarget) {
             e.preventDefault();
@@ -245,7 +233,6 @@ const SectionNavItem: React.FC<{
         }
     };
 
-    // FIX: Changed DragEvent from HTMLDivElement to HTMLButtonElement to match the element it's attached to.
     const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
         if (isDropTarget) {
             onDrop(e);
@@ -253,19 +240,16 @@ const SectionNavItem: React.FC<{
         }
     };
 
+    // FIX: removed duplicate className prop — merged into single string
     return (
         <button
             onClick={onClick}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={() => setIsOver(false)}
-<<<<<<< HEAD
             className={`w-full shrink-0 text-left p-3 rounded-lg border text-sm font-mono transition-all flex items-center justify-between gap-2 ${
-=======
-            className={`w-full text-left p-3 rounded-lg border text-sm font-mono transition-all flex items-center justify-between ${
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
-                isActive 
-                ? 'bg-hack-primary/10 border-hack-primary text-hack-text shadow-[0_0_10px_rgba(var(--hack-primary),0.2)]' 
+                isActive
+                ? 'bg-hack-primary/10 border-hack-primary text-hack-text shadow-[0_0_10px_rgba(var(--hack-primary),0.2)]'
                 : 'bg-hack-bg border-hack-border text-gray-400 hover:border-gray-500'
             } ${isOver ? 'border-hack-accent ring-2 ring-hack-accent' : ''}`}
         >
@@ -284,7 +268,7 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
 
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
-  
+
   const [selectedSectionId, setSelectedSectionId] = useState<string | null | 'all'>('all');
   const [isCategorizing, setIsCategorizing] = useState(false);
   const [debuggingCode, setDebuggingCode] = useState<string | null>(null);
@@ -295,12 +279,11 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
     e.dataTransfer.setData('snippetId', snippetId);
   };
 
-  // FIX: Changed DragEvent from HTMLDivElement to HTMLButtonElement to match the event source.
   const handleDrop = (e: React.DragEvent<HTMLButtonElement>, targetSectionId: string | null) => {
     e.preventDefault();
     const snippetId = e.dataTransfer.getData('snippetId');
     if (snippetId) {
-      setSnippets(prev => prev.map(s => 
+      setSnippets(prev => prev.map(s =>
         s.id === snippetId ? { ...s, sectionId: targetSectionId } : s
       ));
     }
@@ -334,7 +317,6 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
             updatedSnippets = updatedSnippets.map(s => s.id === snippet.id ? { ...s, analysis } : s);
           } catch (error) {
             console.error(`Failed to analyze snippet ${snippet.title}:`, error);
-            // Optionally, set a placeholder analysis to avoid re-attempting
             updatedSnippets = updatedSnippets.map(s => s.id === snippet.id ? { ...s, analysis: { type: 'natural_language', summary: 'Analysis failed.' } } : s);
           }
         }
@@ -357,7 +339,6 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
           section = { id: `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, name: sectionName };
           newSections.push(section);
         }
-
         for (const snippetTitle of categorized[sectionName]) {
           const snippet = newSnippets.find(s => s.title === snippetTitle);
           if (snippet) {
@@ -398,17 +379,17 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
       }
 
       if (editingId) {
-        setSnippets(prev => prev.map(s => 
-          s.id === editingId 
-            ? { 
-                ...s, 
-                title: newSnippet.title!, 
-                code: codeToSave!, 
-                language: newSnippet.language || 'text', 
+        setSnippets(prev => prev.map(s =>
+          s.id === editingId
+            ? {
+                ...s,
+                title: newSnippet.title!,
+                code: codeToSave!,
+                language: newSnippet.language || 'text',
                 sectionId: newSnippet.sectionId,
                 encrypted: isEncrypted,
                 iv: iv
-              } 
+              }
             : s
         ));
       } else {
@@ -418,7 +399,8 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
           code: codeToSave,
           language: newSnippet.language || 'text',
           tags: [],
-          sectionId: newSnippet.sectionId || 'all' ? null : selectedSectionId, // Assign to current section if not 'all'
+          // FIX: corrected broken ternary — assign to current section if not 'all', otherwise null
+          sectionId: selectedSectionId === 'all' ? null : selectedSectionId,
           encrypted: isEncrypted,
           iv: iv
         };
@@ -432,15 +414,12 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
     }
   };
 
+  // FIX: removed the unconditional setSnippets call before confirm() — delete only runs after confirmation
   const deleteSnippet = (e: React.MouseEvent, id: string) => {
       e.stopPropagation();
-<<<<<<< HEAD
-      setSnippets(prev => prev.filter(s => s.id !== id));
-=======
-      if(window.confirm('Delete this snippet?')) {
+      if (window.confirm('Delete this snippet?')) {
         setSnippets(prev => prev.filter(s => s.id !== id));
       }
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   };
 
   const editSnippet = (e: React.MouseEvent, snippet: Snippet) => {
@@ -455,7 +434,7 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
     setEditingId(null);
     setNewSnippet({ title: '', code: '', language: 'javascript', sectionId: null });
   };
-  
+
   const handleAddSectionBlur = (e: React.FocusEvent<HTMLDivElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
         setIsAddingSection(false);
@@ -463,23 +442,19 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
     }
   };
 
-  const filteredSnippetsBySearch = useMemo(() => snippets.filter(s => 
-    s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredSnippetsBySearch = useMemo(() => snippets.filter(s =>
+    s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.code.toLowerCase().includes(searchQuery.toLowerCase())
   ), [snippets, searchQuery]);
-  
+
   const displayedSnippets = useMemo(() => {
-    if (selectedSectionId === 'all') {
-      return filteredSnippetsBySearch;
-    }
-    if (selectedSectionId === null) {
-      return filteredSnippetsBySearch.filter(s => !s.sectionId);
-    }
+    if (selectedSectionId === 'all') return filteredSnippetsBySearch;
+    if (selectedSectionId === null) return filteredSnippetsBySearch.filter(s => !s.sectionId);
     return filteredSnippetsBySearch.filter(s => s.sectionId === selectedSectionId);
   }, [filteredSnippetsBySearch, selectedSectionId]);
 
   const uncategorizedCount = useMemo(() => snippets.filter(s => !s.sectionId).length, [snippets]);
-  
+
   const countsBySection = useMemo(() => {
     const counts: Record<string, number> = {};
     sections.forEach(sec => {
@@ -495,11 +470,11 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
         <h2 className="text-2xl font-bold text-hack-primary flex items-center gap-2 drop-shadow-lg">
             <Icons.Code className="w-6 h-6" /> Snippet Vault
         </h2>
-        
+
         <div className="flex gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
                 <Icons.Search className="absolute left-3 top-2.5 w-4 h-4 text-hack-muted" />
-                <input 
+                <input
                     type="text"
                     placeholder="Search snippets..."
                     value={searchQuery}
@@ -515,7 +490,7 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
             >
                 {isCategorizing ? 'Categorizing...' : 'AI Categorize'}
             </button>
-            <button 
+            <button
                 type="button"
                 onClick={() => {
                     if (showForm) cancelEdit();
@@ -537,19 +512,19 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
           <div className="flex justify-between items-center mb-4">
              <h3 className="font-bold text-xl text-hack-text">{editingId ? 'Edit Snippet' : 'New Snippet'}</h3>
           </div>
-          <input 
-            className="w-full cyber-input p-3 rounded-lg mb-3 text-white focus:ring-2 focus:ring-hack-primary/50" 
+          <input
+            className="w-full cyber-input p-3 rounded-lg mb-3 text-white focus:ring-2 focus:ring-hack-primary/50"
             placeholder="Title (e.g., 'API Key', 'Docker Setup')"
             value={newSnippet.title}
             onChange={e => setNewSnippet({...newSnippet, title: e.target.value})}
           />
-          <textarea 
-            className="w-full cyber-input p-3 rounded-lg mb-3 font-mono text-sm h-48 text-gray-300 focus:ring-2 focus:ring-hack-primary/50" 
+          <textarea
+            className="w-full cyber-input p-3 rounded-lg mb-3 font-mono text-sm h-48 text-gray-300 focus:ring-2 focus:ring-hack-primary/50"
             placeholder="Paste code or secret here..."
             value={newSnippet.code}
             onChange={e => setNewSnippet({...newSnippet, code: e.target.value})}
           />
-           <select
+          <select
                 className="w-full cyber-input p-3 rounded-lg mb-4 text-white focus:ring-2 focus:ring-hack-primary/50"
                 value={newSnippet.sectionId || ''}
                 onChange={e => setNewSnippet({...newSnippet, sectionId: e.target.value || null })}
@@ -570,41 +545,30 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
         </div>
       )}
 
-<<<<<<< HEAD
-      <div className="flex-1 flex flex-col md:grid md:grid-cols-5 gap-6 overflow-hidden pb-2">
+      {/* FIX: removed duplicate outer container — single grid layout kept */}
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-6 overflow-hidden pb-2">
         {/* Navigator Sidebar */}
         <div className="md:col-span-1 glass-panel rounded-xl p-4 flex flex-col h-48 md:h-full shrink-0">
             <h3 className="text-xs font-bold text-hack-muted uppercase tracking-widest mb-2 md:mb-4 px-1">Sections</h3>
             <div className="flex flex-col overflow-y-auto space-y-2 pr-1 custom-scrollbar flex-1">
-=======
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-6 overflow-hidden pb-2">
-        {/* Navigator Sidebar */}
-        <div className="md:col-span-1 glass-panel rounded-xl p-4 flex flex-col h-full">
-            <h3 className="text-xs font-bold text-hack-muted uppercase tracking-widest mb-4 px-1">Sections</h3>
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
-                <SectionNavItem 
+                <SectionNavItem
                     label="All Snippets"
                     isActive={selectedSectionId === 'all'}
                     onClick={() => setSelectedSectionId('all')}
-                    onDrop={() => {}} // No drop action for 'all'
+                    onDrop={() => {}}
                     snippetCount={snippets.length}
                     isDropTarget={false}
                 />
-                 <SectionNavItem 
+                <SectionNavItem
                     label="Uncategorized"
                     isActive={selectedSectionId === null}
                     onClick={() => setSelectedSectionId(null)}
                     onDrop={(e) => handleDrop(e, null)}
                     snippetCount={uncategorizedCount}
                 />
-<<<<<<< HEAD
-                <div className="hidden md:block my-3 border-t border-white/10"></div>
-=======
                 <div className="my-3 border-t border-white/10"></div>
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                 {sections.map(section => (
-                    <SectionNavItem 
+                    <SectionNavItem
                         key={section.id}
                         label={section.name || ''}
                         isActive={selectedSectionId === section.id}
@@ -614,11 +578,7 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
                     />
                 ))}
             </div>
-<<<<<<< HEAD
             <div className="mt-2 md:mt-4 pt-2 md:pt-4 border-t border-white/10 shrink-0">
-=======
-            <div className="mt-4 pt-4 border-t border-white/10">
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                 {isAddingSection ? (
                     <div onBlur={handleAddSectionBlur} className="p-1 animate-fade-in">
                         <input
@@ -633,7 +593,7 @@ export const SnippetVault: React.FC<SnippetVaultProps> = ({ snippets, setSnippet
                         <button onClick={handleAddSection} className="w-full mt-2 bg-hack-primary text-black font-bold py-2 rounded text-sm hover:bg-white transition-colors">Add</button>
                     </div>
                 ) : (
-                    <button 
+                    <button
                         onClick={() => setIsAddingSection(true)}
                         className="w-full h-10 flex items-center justify-center gap-2 bg-white/5 border-2 border-dashed border-white/10 hover:bg-white/10 text-hack-muted hover:text-white transition-all rounded-lg text-sm hover:border-white/20"
                     >

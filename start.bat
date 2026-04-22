@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 @echo off
 title SYNAPSE Launcher
 
@@ -33,7 +32,6 @@ echo.
 echo ===============================
 echo Process finished
 echo ===============================
-=======
 @echo off
 title SYNAPSE Launcher
 
@@ -68,5 +66,4 @@ echo.
 echo ===============================
 echo Process finished
 echo ===============================
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 pause

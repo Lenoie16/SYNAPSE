@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
-=======
     "ignoreDeprecations": "6.0",
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -14,11 +11,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-<<<<<<< HEAD
-    "moduleResolution": "Node",
-=======
     "moduleResolution": "Bundler",
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,

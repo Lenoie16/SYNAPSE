@@ -21,7 +21,7 @@ export const PressureMeter: React.FC<PressureMeterProps> = ({ tasks, startTime, 
       const now = Date.now();
       const totalDuration = endTime - startTime;
       const elapsed = now - startTime;
-      
+
       if (totalDuration <= 0) {
         setAnalysis({ level: 100, message: "Time anomaly detected.", color: "#808080" });
         return;
@@ -67,9 +67,9 @@ export const PressureMeter: React.FC<PressureMeterProps> = ({ tasks, startTime, 
   return (
     <div className="bg-[rgb(var(--hack-surface))]/80 border border-[rgb(var(--hack-border))] p-5 rounded-sm relative overflow-hidden group animate-fade-in backdrop-blur-md">
       <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-30 transition-opacity duration-500">
-          <Activity className="w-16 h-16 text-[rgb(var(--hack-primary))]" />
+        <Activity className="w-16 h-16 text-[rgb(var(--hack-primary))]" />
       </div>
-      
+
       <h3 className="font-bold text-[rgb(var(--hack-text))]/30 text-[10px] uppercase mb-4 tracking-[0.2em] flex items-center gap-2">
         <Zap className="w-3.5 h-3.5 text-[rgb(var(--hack-primary))] animate-pulse" />
         System Pressure Analysis
@@ -77,12 +77,12 @@ export const PressureMeter: React.FC<PressureMeterProps> = ({ tasks, startTime, 
 
       <div className="space-y-5">
         <div className="relative h-2 bg-[rgb(var(--hack-bg))]/40 rounded-sm overflow-hidden border border-[rgb(var(--hack-border))]">
-          <div 
-            className="absolute top-0 left-0 h-full transition-all duration-1000 ease-out relative overflow-hidden"
-            style={{ 
-                width: `${analysis.level}%`, 
-                backgroundColor: analysis.color,
-                boxShadow: `0 0 20px ${analysis.color}80`
+          <div
+            className="absolute top-0 left-0 h-full transition-all duration-1000 ease-out overflow-hidden"
+            style={{
+              width: `${analysis.level}%`,
+              backgroundColor: analysis.color,
+              boxShadow: `0 0 20px ${analysis.color}80`
             }}
           >
             <div className="absolute inset-0 bg-[rgb(var(--hack-text))]/20 animate-pulse"></div>
@@ -103,12 +103,12 @@ export const PressureMeter: React.FC<PressureMeterProps> = ({ tasks, startTime, 
             </span>
           </div>
         </div>
-        
+
         {analysis.level > 85 && (
-            <div className="flex items-center gap-2 text-[10px] font-bold text-[rgb(var(--hack-danger))] animate-pulse bg-[rgb(var(--hack-danger))]/10 p-2.5 rounded-sm border border-[rgb(var(--hack-danger))]/20 shadow-[0_0_10px_rgba(var(--hack-danger),0.2)]">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                CRITICAL PRESSURE DETECTED
-            </div>
+          <div className="flex items-center gap-2 text-[10px] font-bold text-[rgb(var(--hack-danger))] animate-pulse bg-[rgb(var(--hack-danger))]/10 p-2.5 rounded-sm border border-[rgb(var(--hack-danger))]/20 shadow-[0_0_10px_rgba(var(--hack-danger),0.2)]">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            CRITICAL PRESSURE DETECTED
+          </div>
         )}
       </div>
     </div>
