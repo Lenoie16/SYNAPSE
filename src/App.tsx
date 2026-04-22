@@ -2,14 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { View, Task, Snippet, SharedFile, User, DirectoryState, Section, EditorNode, EditorFile, EditorFolder } from '@/types';
 import { Kanban } from '@/components/Kanban';
-<<<<<<< HEAD
 
-=======
 import { BoilerplateGenerator } from '@/components/BoilerplateGenerator';
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { SnippetVault } from '@/components/SnippetVault';
 
-import { DirectoryBrowser } from '@/components/DirectoryBrowser';
+// FIX: DirectoryBrowser is a default export — was incorrectly imported as named export
+import DirectoryBrowser from '@/components/DirectoryBrowser';
 import { FileBrowser } from '@/components/FileBrowser';
 import { Timer } from '@/components/Timer';
 import { PressureMeter } from '@/components/PressureMeter';
@@ -18,10 +16,7 @@ import { Users } from 'lucide-react';
 import { Settings } from '@/components/Settings';
 import { Login } from '@/components/Login';
 import { SpotlightNavbar } from '@/components/SpotlightNavbar';
-<<<<<<< HEAD
 import { useIsMobile } from '@/hooks/useIsMobile';
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { motion, AnimatePresence } from 'framer-motion';
 import CollaborativeCodeEditor from '@/components/CollaborativeCodeEditor';
 import { ProjectSidebar } from '@/components/ProjectSidebar';
@@ -30,18 +25,12 @@ import { SubtleBackground } from '@/components/SubtleBackground';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import ChatBox from '@/components/ChatBox';
-<<<<<<< HEAD
 import { Whiteboard } from '@/components/Whiteboard';
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { useGemini } from '@/hooks/useGemini';
 
 
 const App: React.FC = () => {
-<<<<<<< HEAD
   const isMobile = useIsMobile();
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
   // --- Auth & Room State ---
   const [roomName, setRoomName] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -56,13 +45,10 @@ const App: React.FC = () => {
   
   // --- App View State ---
   const [view, setView] = useState<View>('kanban');
-<<<<<<< HEAD
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(true);
-=======
-  const [isConnected, setIsConnected] = useState(false);
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
+  // FIX: removed duplicate const [isConnected, setIsConnected] = useState(false)
   const socketRef = useRef<Socket | null>(null);
   
   const [serverUrl, setServerUrl] = useState<string>(() => {
@@ -162,23 +148,17 @@ const App: React.FC = () => {
     socket.on('connect', () => {
       console.log('Socket connected');
       setIsConnected(true);
-<<<<<<< HEAD
       setIsConnecting(false);
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     });
 
     socket.on('disconnect', (reason) => {
       console.log('Socket disconnected:', reason);
       setIsConnected(false);
-<<<<<<< HEAD
       setIsConnecting(false);
     });
 
     socket.on('connect_error', () => {
       setIsConnecting(false);
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     });
 
     // --- Room Auth Events ---
@@ -431,8 +411,6 @@ const App: React.FC = () => {
     window.open(`/api/editor/download-zip/${roomName}`, '_blank');
   };
 
-  // Directory Upload Handler is no longer needed in App.tsx as DirectoryBrowser handles it internally now via socket
-
   const getFormattedDateForInput = (timestamp: number) => {
       const date = new Date(timestamp);
       const year = date.getFullYear();
@@ -443,18 +421,6 @@ const App: React.FC = () => {
       return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-
-
-<<<<<<< HEAD
-  const content = !roomName ? (
-      <Login 
-          onJoin={handleJoinRoom} 
-          error={authError} 
-          themeMode={themeMode}
-          toggleTheme={toggleTheme}
-      />
-  ) : (
-=======
   if (!roomName) {
       return (
           <Login 
@@ -467,7 +433,6 @@ const App: React.FC = () => {
   }
 
   return (
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     <div className="min-h-screen text-hack-text font-sans selection:bg-hack-primary selection:text-black flex flex-col animate-fade-in overflow-hidden relative pb-24 transition-colors duration-500 rounded-2xl shadow-lg">
       <SubtleBackground mode={themeMode} />
       
@@ -499,10 +464,8 @@ const App: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-6">
-
             <Timer endTime={endTime} />
             <ThemeToggle themeMode={themeMode} toggleTheme={toggleTheme} />
-
           </div>
         </div>
         <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-hack-primary/30 to-transparent absolute bottom-0"></div>
@@ -514,7 +477,6 @@ const App: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
                 <div className="lg:col-span-3 h-full overflow-hidden flex flex-col relative">
 
-
                     {/* Corner Decorations */}
                     <div className="absolute top-0 left-0 w-24 h-24 border-l border-t border-hack-border rounded-tl-lg opacity-30"></div>
                     <div className="absolute top-0 right-0 w-24 h-24 border-r border-t border-hack-border rounded-tr-lg opacity-30"></div>
@@ -523,7 +485,6 @@ const App: React.FC = () => {
 
                     <div className="flex-1 backdrop-blur-sm border border-hack-border p-1 h-full overflow-hidden rounded-xl relative">
                         <AnimatePresence mode="wait">
-<<<<<<< HEAD
                             {view === 'whiteboard' && (
                                 <motion.div
                                     key="whiteboard"
@@ -536,8 +497,6 @@ const App: React.FC = () => {
                                     <Whiteboard socket={socketRef.current} roomName={roomName} />
                                 </motion.div>
                             )}
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                             {view === 'kanban' && (
                                 <motion.div
                                     key="kanban"
@@ -574,23 +533,23 @@ const App: React.FC = () => {
                                 </motion.div>
                             )}
                             {view === 'files' && (
+                                <motion.div
+                                    key="files"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="h-full w-full"
+                                >
                                     <FileBrowser 
                                         files={files}
                                         sections={fileSections}
                                         onSectionsChange={handleUpdateFileSections}
+                                        // FIX: removed premature fetch before confirm — delete only fires after user confirms
                                         onFileDelete={(fileName) => {
-<<<<<<< HEAD
-                                            fetch(`/upload/${roomName}/${fileName}`, { 
-                                                method: 'DELETE',
-                                                headers: {
-                                                    'Authorization': accessKey || ''
-                                                }
-                                            });
-=======
                                             if (confirm(`Are you sure you want to delete ${fileName}?`)) {
                                                 fetch(`/upload/${roomName}/${fileName}`, { method: 'DELETE' });
                                             }
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                                         }}
                                         serverUrl={serverUrl}
                                         roomName={roomName}
@@ -600,6 +559,7 @@ const App: React.FC = () => {
                                         roomPassword={accessKey || ''}
                                         encryptionEnabled={encryptionEnabled}
                                     />
+                                </motion.div>
                             )}
                             {view === 'boilerplate' && (
                                 <motion.div
@@ -631,14 +591,13 @@ const App: React.FC = () => {
                                     />
                                 </motion.div>
                             )}
-                            {view === 'code-editor' && ( // New Code Editor View
+                            {view === 'code-editor' && (
                                 <motion.div
                                     key="code-editor"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
                                     transition={{ duration: 0.3 }}
-<<<<<<< HEAD
                                     className="h-full w-full flex overflow-hidden relative"
                                 >
                                     {(!isMobile || showMobileSidebar) && (
@@ -687,36 +646,6 @@ const App: React.FC = () => {
                                             </div>
                                         )}
                                     </div>
-=======
-                                    className="h-full w-full flex overflow-hidden"
-                                >
-                                    <ProjectSidebar
-                                        files={editorFiles}
-                                        onSelectFile={setSelectedFile}
-                                        onCreateFile={handleCreateFile}
-                                        onCreateFolder={handleCreateFolder}
-                                        onDelete={handleDeleteNode}
-                                        onRename={handleRenameNode}
-                                        onDownloadZip={handleDownloadZip}
-                                        selectedFileId={selectedFile?.id || null}
-                                    />
-                                    {selectedFile ? (
-                                        <CollaborativeCodeEditor 
-                                            roomName={roomName} 
-                                            documentId={selectedFile.id}
-                                            initialContent={selectedFile.content}
-                                            language={selectedFile.language}
-                                            socket={socketRef.current!}
-                                        />
-                                    ) : (
-                                        <div className="flex-1 flex items-center justify-center text-gray-500 bg-[#1e1e1e]">
-                                            <div className="text-center">
-                                                <p className="mb-2">Select a file to start editing</p>
-                                                <p className="text-xs opacity-50">Changes are saved automatically</p>
-                                            </div>
-                                        </div>
-                                    )}
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                                 </motion.div>
                             )}
                             {view === 'admin' && (
@@ -771,7 +700,6 @@ const App: React.FC = () => {
                                     />
                                 </motion.div>
                             )}
-<<<<<<< HEAD
                             {view === 'chat' && (
                                 <motion.div
                                     key="chat"
@@ -833,13 +761,11 @@ const App: React.FC = () => {
                                     </div>
                                 </motion.div>
                             )}
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
                         </AnimatePresence>
                     </div>
                 </div>
 
-                    <div className="hidden lg:flex lg:col-span-1 flex-col gap-4 h-full overflow-y-auto">
+                <div className="hidden lg:flex lg:col-span-1 flex-col gap-4 h-full overflow-y-auto">
                     <PressureMeter tasks={tasks} endTime={endTime} startTime={startTime} />
                     <ChatBox 
                         socket={socketRef.current} 
@@ -883,48 +809,39 @@ const App: React.FC = () => {
             </div>
         </main>
       </div>
-<<<<<<< HEAD
-      <SpotlightNavbar currentView={view} onNavigate={setView} isMobile={isMobile} />
-    </div>
-  );
 
-  return (
-    <>
-        {content}
-        {!isConnecting && !isConnected && (
-            <div className="fixed inset-0 z-[9999] backdrop-blur-xl bg-black/60 flex flex-col items-center justify-center p-4">
-                <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center flex flex-col items-center border border-red-500/30 bg-black/40 p-12 rounded-2xl shadow-[0_0_50px_rgba(239,68,68,0.2)]"
-                >
-                    <h2 className="text-6xl md:text-8xl font-black font-sans tracking-widest text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4">OFFLINE</h2>
-                    <p className="text-hack-muted font-mono mb-8 max-w-md text-sm leading-relaxed">
-                        Connection to Synapse server severed. Local systems isolated. Data synchronization halted.
-                    </p>
-                    <button 
-                        onClick={() => {
-                            setIsConnecting(true);
-                            if (socketRef.current) {
-                                socketRef.current.connect();
-                            } else {
-                                window.location.reload();
-                            }
-                        }}
-                        className="px-8 py-3 bg-red-500/10 border border-red-500 text-red-500 font-bold font-mono uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.5)] cursor-pointer"
-                    >
-                        Attempt Reconnection
-                    </button>
-                </motion.div>
-            </div>
-        )}
-    </>
-  );
-=======
-      <SpotlightNavbar currentView={view} onNavigate={setView} />
+      <SpotlightNavbar currentView={view} onNavigate={setView} isMobile={isMobile} />
+
+      {/* FIX: merged offline overlay from broken second return into the single return */}
+      {!isConnecting && !isConnected && (
+          <div className="fixed inset-0 z-[9999] backdrop-blur-xl bg-black/60 flex flex-col items-center justify-center p-4">
+              <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center flex flex-col items-center border border-red-500/30 bg-black/40 p-12 rounded-2xl shadow-[0_0_50px_rgba(239,68,68,0.2)]"
+              >
+                  <h2 className="text-6xl md:text-8xl font-black font-sans tracking-widest text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] mb-4">OFFLINE</h2>
+                  <p className="text-hack-muted font-mono mb-8 max-w-md text-sm leading-relaxed">
+                      Connection to Synapse server severed. Local systems isolated. Data synchronization halted.
+                  </p>
+                  <button 
+                      onClick={() => {
+                          setIsConnecting(true);
+                          if (socketRef.current) {
+                              socketRef.current.connect();
+                          } else {
+                              window.location.reload();
+                          }
+                      }}
+                      className="px-8 py-3 bg-red-500/10 border border-red-500 text-red-500 font-bold font-mono uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:shadow-[0_0_25px_rgba(239,68,68,0.5)] cursor-pointer"
+                  >
+                      Attempt Reconnection
+                  </button>
+              </motion.div>
+          </div>
+      )}
     </div>
   );
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 };
 
 export default App;

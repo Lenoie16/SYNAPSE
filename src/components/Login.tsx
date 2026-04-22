@@ -70,7 +70,6 @@ const SpaceCanvas: React.FC = () => {
       buildStars();
     };
 
-<<<<<<< HEAD
     let resizeTimeout: any;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
@@ -82,9 +81,7 @@ const SpaceCanvas: React.FC = () => {
     };
 
     window.addEventListener('resize', handleResize);
-=======
     window.addEventListener('resize', resize);
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     resize();
 
     const render = (ts: number) => {
@@ -143,12 +140,9 @@ const SpaceCanvas: React.FC = () => {
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
-<<<<<<< HEAD
       window.removeEventListener('resize', handleResize);
       clearTimeout(resizeTimeout);
-=======
       window.removeEventListener('resize', resize);
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -177,7 +171,6 @@ const WaveCanvas: React.FC = () => {
       H = cv.height = window.innerHeight;
     };
 
-<<<<<<< HEAD
     let resizeTimeout: any;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
@@ -189,9 +182,7 @@ const WaveCanvas: React.FC = () => {
     };
 
     window.addEventListener('resize', handleResize);
-=======
     window.addEventListener('resize', resize);
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
     resize();
 
     const render = (ts: number) => {
@@ -300,12 +291,9 @@ const WaveCanvas: React.FC = () => {
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
-<<<<<<< HEAD
       window.removeEventListener('resize', handleResize);
       clearTimeout(resizeTimeout);
-=======
       window.removeEventListener('resize', resize);
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
@@ -401,21 +389,14 @@ export const Login: React.FC<LoginProps> = ({ onJoin, error }) => {
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     
     const loop = () => {
-<<<<<<< HEAD
-      if (window.innerWidth >= 768) {
-        cY = lerp(cY, tY, 0.03);
-        cX = lerp(cX, tX, 0.03);
-        if (cardRef.current) {
-          cardRef.current.style.transform = `perspective(900px) rotateY(${cY}deg) rotateX(${cX}deg) translateZ(6px)`;
-        }
-      } else if (cardRef.current) {
-        cardRef.current.style.transform = 'none';
-=======
       cY = lerp(cY, tY, 0.03);
       cX = lerp(cX, tX, 0.03);
       if (cardRef.current) {
-        cardRef.current.style.transform = `perspective(900px) rotateY(${cY}deg) rotateX(${cX}deg) translateZ(6px)`;
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
+        if (window.innerWidth >= 768) {
+          cardRef.current.style.transform = `perspective(900px) rotateY(${cY}deg) rotateX(${cX}deg) translateZ(6px)`;
+        } else {
+          cardRef.current.style.transform = 'none';
+        }
       }
       frameId = requestAnimationFrame(loop);
     };
@@ -575,6 +556,3 @@ export const Login: React.FC<LoginProps> = ({ onJoin, error }) => {
     </>
   );
 };
-
-
-

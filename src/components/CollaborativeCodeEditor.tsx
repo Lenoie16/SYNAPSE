@@ -2,20 +2,13 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { MonacoBinding } from 'y-monaco';
-<<<<<<< HEAD
 import Editor, { OnMount, loader } from '@monaco-editor/react';
-=======
-import Editor, { OnMount } from '@monaco-editor/react';
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 import { editor } from 'monaco-editor';
 import { Save } from 'lucide-react';
 import { Socket } from 'socket.io-client';
 
-<<<<<<< HEAD
 loader.config({ paths: { vs: '/monaco-editor/min/vs' } });
 
-=======
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 interface CollaborativeCodeEditorProps {
   roomName: string;
   documentId: string;

@@ -1,5 +1,3 @@
-
-
 export enum TaskStatus {
   TODO = 'TODO',
   DOING = 'DOING',
@@ -69,11 +67,8 @@ export interface BoilerplateConfig {
   };
 }
 
-<<<<<<< HEAD
+// FIX: removed duplicate View type — kept the complete version with whiteboard, chat, diagnostics
 export type View = 'whiteboard' | 'kanban' | 'snippets' | 'boilerplate' | 'settings' | 'files' | 'directory' | 'admin' | 'code-editor' | 'chat' | 'diagnostics';
-=======
-export type View = 'kanban' | 'snippets' | 'boilerplate' | 'settings' | 'files' | 'directory' | 'admin' | 'code-editor';
->>>>>>> c25ba38898c417e80d080ff38887c14811f9c69d
 
 export interface PressureAnalysis {
   level: number; // 0-100
