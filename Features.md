@@ -6,7 +6,7 @@ SYNAPSE is a real-time collaboration platform designed for developers to code, o
 
 # 1. Real-Time Room System
 
-### What it does
+### What it does it does
 
 * **Instant Workspaces** – Create or join rooms instantly using a room name and password. No account required.
 * **Host Authority** – The room creator becomes the Host and can manage users, change passwords, and control encryption.
